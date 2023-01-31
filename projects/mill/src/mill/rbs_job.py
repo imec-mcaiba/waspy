@@ -5,12 +5,13 @@ from typing import List, Union, Dict
 
 from mill.logbook_db import LogBookDb
 from mill.recipe_meta import RecipeMeta
-from waspy.iba.rbs_entities import RecipeType, RbsRandom, RbsChanneling, AysJournal, CoordinateRange
+from waspy.iba.rbs_entities import RecipeType, RbsRandom, RbsChanneling, AysJournal, CoordinateRange, RbsChannelingMap
 from mill.rbs_entities import RbsJobModel, make_rbs_status
 from mill.job import Job
 
 from waspy.iba.file_handler import FileHandler
-from waspy.iba.rbs_recipes import run_random, run_channeling, save_rbs_journal, save_channeling_journal
+from waspy.iba.rbs_recipes import run_random, run_channeling, save_rbs_journal, save_channeling_journal, \
+    run_channeling_map, save_channeling_map_to_disk
 from waspy.iba.rbs_setup import RbsSetup
 
 empty_recipe = RbsRandom(type="rbs_random", sample="", name="", charge_total=0,
@@ -92,6 +93,11 @@ class RbsJob(Job):
         journal = run_random(recipe, self._rbs_setup)
         recipe_meta_data = self._recipe_meta.fill_rbs_recipe_meta()
         save_rbs_journal(self._file_writer, recipe, journal, recipe_meta_data)
+
+    def _run_channeling_map_recipe(self, recipe: RbsChannelingMap):
+        journal = run_channeling_map(recipe, self._rbs_setup)
+        save_channeling_map_to_disk(self._file_writer, journal.cms_yields, recipe.name)
+        print(journal)
         # TODO: log finish in db
 
     def _run_channeling_recipe(self, recipe: RbsChanneling):
@@ -101,7 +107,7 @@ class RbsJob(Job):
         save_channeling_journal(self._file_writer, recipe, journal, recipe_meta_data)
         # TODO: log finish in db
 
-    def _run_recipe(self, recipe: RbsRandom | RbsChanneling):
+    def _run_recipe(self, recipe: RbsRandom | RbsChanneling | RbsChannelingMap):
         self._active_recipe = recipe
         self._rbs_setup.clear_charge_offset()
         self._recipe_start_time = datetime.now()
@@ -110,6 +116,8 @@ class RbsJob(Job):
             self._run_random_recipe(recipe)
         if recipe.type == RecipeType.CHANNELING:
             self._run_channeling_recipe(recipe)
+        if recipe.type == RecipeType.CHANNELING_MAP:
+            self._run_channeling_map_recipe(recipe)
         self._running = False
 
     def _finish_recipe(self):
@@ -133,7 +141,15 @@ def _get_total_counts_channeling(recipe: RbsChanneling):
     return yield_optimize_total_charge + compare_total_charge
 
 
-def _get_total_counts(recipe: Union[RbsRandom, RbsChanneling]):
+def _get_total_counts_channeling_map(recipe: RbsChannelingMap):
+    zeta_locations = (recipe.zeta_coordinate_range.end-recipe.zeta_coordinate_range.start)/recipe.zeta_coordinate_range.increment
+    theta_locations = (recipe.theta_coordinate_range.end-recipe.theta_coordinate_range.start)/recipe.theta_coordinate_range.increment
+    return recipe.charge_total * zeta_locations * theta_locations
+
+
+def _get_total_counts(recipe: Union[RbsRandom, RbsChanneling, RbsChannelingMap]):
+    if recipe.type == RecipeType.CHANNELING_MAP:
+        return _get_total_counts_channeling_map(recipe)
     if recipe.type == RecipeType.CHANNELING:
         return _get_total_counts_channeling(recipe)
     if recipe.type == RecipeType.RANDOM:

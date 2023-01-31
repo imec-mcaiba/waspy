@@ -45,6 +45,9 @@ class RbsSetup:
     def cancel(self):
         self._cancel = True
 
+    def cancelled(self):
+        return self._cancel
+
     def resume(self):
         if not self._fake:
             self._cancel = False

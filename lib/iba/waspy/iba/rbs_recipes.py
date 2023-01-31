@@ -2,14 +2,17 @@ import logging
 from datetime import datetime
 from typing import List
 
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy.optimize import OptimizeWarning
 
 from waspy.iba.file_handler import FileHandler
 from waspy.iba.iba_error import CancelError
-from waspy.iba.rbs_plot import plot_energy_yields, plot_graph_group
+from waspy.iba.rbs_plot import plot_energy_yields, plot_graph_group, plot_heat_map
 from waspy.iba.rbs_entities import get_positions_as_coordinate, CoordinateRange, Graph, Plot, \
     RbsChanneling, get_positions_as_float, Window, PositionCoordinates, GraphGroup, RbsRandom, \
-    AysFitResult, AysJournal, RbsData, ChannelingJournal, RbsJournal, get_rbs_journal
+    AysFitResult, AysJournal, RbsData, ChannelingJournal, RbsJournal, get_rbs_journal, CmsJournal, RbsChannelingMap, \
+    CmsYield
 from waspy.iba.rbs_setup import RbsSetup
 from waspy.iba.rbs_yield_angle_fit import fit_and_smooth
 
@@ -19,6 +22,33 @@ def run_random(recipe: RbsRandom, rbs: RbsSetup) -> RbsJournal:
     rbs.move(recipe.start_position)
     rbs_data = run_rbs_recipe(recipe.coordinate_range, recipe.charge_total, rbs)
     return get_rbs_journal(rbs_data, start_time)
+
+
+def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> CmsJournal:
+    start_time=datetime.now()
+    rbs.move(recipe.start_position)
+
+    zeta_angles = get_positions_as_float(recipe.zeta_coordinate_range)
+    theta_angles = get_positions_as_float(recipe.theta_coordinate_range)
+    cms_yields = []
+
+    for zeta in zeta_angles:
+        for theta in theta_angles:
+            rbs.move(PositionCoordinates(zeta=zeta, theta=theta))
+            rbs_data = rbs.acquire_data(recipe.charge_total)
+            histogram_data = rbs_data.histograms[recipe.optimize_detector_identifier]
+            energy_yield = get_sum(histogram_data, recipe.yield_integration_window)
+            cms_yields.append(CmsYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
+
+    end_time = datetime.now()
+
+    return CmsJournal(start_time=start_time, end_time=end_time, cms_yields=cms_yields)
+
+
+def save_channeling_map_to_disk(file_writer, yields: List[CmsYield], title):
+    print(yields)
+    fig = plot_heat_map(yields, f"Channeling Map {title}")
+    file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{title}.png', fig)
 
 
 def run_channeling(recipe: RbsChanneling, rbs: RbsSetup,
@@ -51,7 +81,7 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
     for position in positions:
         rbs.move(position)
         rbs.acquire_data(charge_per_step)
-        if rbs._cancel:
+        if rbs.cancelled():
             raise CancelError("RBS Recipe was cancelled")
     rbs.finalize_acquisition()
     return rbs.get_status(True)
@@ -136,6 +166,7 @@ def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(
     """ays: angular yield scan"""
     start_time = datetime.now()
     result = []
+    logging.info(f"[WASPY.IBA.RBS_RECIPES] YIELD COORD RANGES {recipe.yield_coordinate_ranges}")
     for coordinate_range in recipe.yield_coordinate_ranges:
         rbs_journals = []
         yields = []

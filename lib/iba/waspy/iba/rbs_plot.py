@@ -1,11 +1,12 @@
 import copy
+import random
 from datetime import datetime
 from typing import List
 
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-from waspy.iba.rbs_entities import RbsData, GraphGroup, AysFitResult, Graph
+from waspy.iba.rbs_entities import RbsData, GraphGroup, AysFitResult, Graph, CmsYield
 import matplotlib
 
 matplotlib.use('Agg')
@@ -24,6 +25,35 @@ def plot_graph_group(graph_group: GraphGroup) -> Figure:
         for plot in graph.plots:
             ax.plot(plot.points, label=plot.title)
         _configure_ax(ax, graph.x_label, graph.y_label)
+
+    return fig
+
+
+def plot_heat_map(yields: List[CmsYield], title) -> Figure:
+    x_axis = []
+    y_axis = []
+
+    for cms_yield in yields:
+        if cms_yield.theta not in x_axis:
+            x_axis.append(cms_yield.theta)
+        if cms_yield.zeta not in y_axis:
+            y_axis.append(cms_yield.zeta)
+
+    x_axis.sort()
+    y_axis.sort()
+
+    data = np.empty(shape=(len(y_axis), len(x_axis)), dtype=int)
+    for cms_yield in yields:
+        data[y_axis.index(cms_yield.zeta)][x_axis.index(cms_yield.theta)] = cms_yield.energy_yield
+
+    fig, ax = plt.subplots()
+    ax.set_title(title)
+    ax.set_xlabel("theta")
+    ax.set_ylabel("zeta")
+    ax.set_xticks(np.arange(len(x_axis)), labels=x_axis)
+    ax.set_yticks(np.arange(len(y_axis)), labels=y_axis)
+    im = ax.imshow(data)
+    fig.colorbar(im)
 
     return fig
 

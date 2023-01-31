@@ -75,6 +75,18 @@ class AysJournal(BaseModel):
     fit: AysFitResult
 
 
+class CmsYield(BaseModel):
+    zeta: float
+    theta: float
+    energy_yield: int
+
+
+class CmsJournal(BaseModel):
+    start_time: datetime
+    end_time: datetime
+    cms_yields: List[CmsYield]
+
+
 class ChannelingJournal(BaseModel):
     random: RbsJournal
     fixed: RbsJournal
@@ -131,6 +143,7 @@ class RbsHistogramGraphDataSet(BaseModel):
 
 
 class RecipeType(str, Enum):
+    CHANNELING_MAP = "rbs_channeling_map"
     CHANNELING = "rbs_channeling"
     RANDOM = "rbs_random"
     ANGULAR_YIELD = "rbs_angular_yield"
@@ -240,6 +253,19 @@ class RbsRandom(BaseModel):
     start_position: Optional[PositionCoordinates]
     charge_total: int
     coordinate_range: CoordinateRange
+
+
+class RbsChannelingMap(BaseModel):
+    """ The model for a channeling map measurement - the 2 vary_coordinates are changed depending on each other """
+    type: Literal[RecipeType.CHANNELING_MAP]
+    sample: str
+    name: str
+    start_position: Optional[PositionCoordinates]
+    charge_total: int
+    zeta_coordinate_range: CoordinateRange
+    theta_coordinate_range: CoordinateRange
+    yield_integration_window: Window
+    optimize_detector_identifier: str
 
 
 class RbsSingleStep(BaseModel):
