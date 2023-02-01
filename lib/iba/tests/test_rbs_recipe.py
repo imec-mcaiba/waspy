@@ -23,7 +23,6 @@ class TestDbTables(unittest.TestCase):
 
         rbs_setup = MagicMock(spec=RbsSetup)
 
-
         rbs_data = RbsData(
             aml_x_y={"motor_1_position": 10, "motor_2_position": 20},
             aml_phi_zeta={"motor_1_position": 30, "motor_2_position": 40},

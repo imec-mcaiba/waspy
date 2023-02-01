@@ -106,6 +106,11 @@ class PositionCoordinates(BaseModel):
                                                                     det=self.detector, theta=self.theta)
 
 
+class HeatMap(BaseModel):
+    title: str
+    yields: List[CmsYield]
+
+
 class Graph(BaseModel):
     title: str
     plots: List[Plot]
@@ -129,8 +134,8 @@ class RbsHistogramGraphData(BaseModel):
 class RbsHistogramGraphDataSet(BaseModel):
     """
         The amount of items in the super-list of histograms determines how many graphs will be created. The data in the"
-        sub-list of histograms will be plot on the same graph. There can be more than 1 plot per graph")
-        ]Example:
+        sub-list of histograms will be plotted on the same graph. There can be more than 1 plot per graph")
+        Example:
             histograms = [ [[0,1,2], [1,2,3]], [[2,3,4], [3,4,5]], [[4,5,6], [5,6,7]] ]
                            ---- graph 1 ----   ---- graph 2 -----  ---- graph 3 -----
                            -plot 1-  -plot 2-  -plot 1-  -plot 2-  - plot 1-  -plot 2-

@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-from waspy.iba.rbs_entities import RbsData, GraphGroup, AysFitResult, Graph, CmsYield
+from waspy.iba.rbs_entities import RbsData, GraphGroup, AysFitResult, Graph, CmsYield, HeatMap
 import matplotlib
 
 matplotlib.use('Agg')
@@ -29,11 +29,11 @@ def plot_graph_group(graph_group: GraphGroup) -> Figure:
     return fig
 
 
-def plot_heat_map(yields: List[CmsYield], title) -> Figure:
+def plot_heat_map(heat_map: HeatMap) -> Figure:
     x_axis = []
     y_axis = []
 
-    for cms_yield in yields:
+    for cms_yield in heat_map.yields:
         if cms_yield.theta not in x_axis:
             x_axis.append(cms_yield.theta)
         if cms_yield.zeta not in y_axis:
@@ -43,11 +43,11 @@ def plot_heat_map(yields: List[CmsYield], title) -> Figure:
     y_axis.sort()
 
     data = np.empty(shape=(len(y_axis), len(x_axis)), dtype=int)
-    for cms_yield in yields:
+    for cms_yield in heat_map.yields:
         data[y_axis.index(cms_yield.zeta)][x_axis.index(cms_yield.theta)] = cms_yield.energy_yield
 
     fig, ax = plt.subplots()
-    ax.set_title(title)
+    ax.set_title(f"Channeling Map {heat_map.title}")
     ax.set_xlabel("theta")
     ax.set_ylabel("zeta")
     ax.set_xticks(np.arange(len(x_axis)), labels=x_axis)

@@ -12,7 +12,7 @@ from waspy.iba.rbs_plot import plot_energy_yields, plot_graph_group, plot_heat_m
 from waspy.iba.rbs_entities import get_positions_as_coordinate, CoordinateRange, Graph, Plot, \
     RbsChanneling, get_positions_as_float, Window, PositionCoordinates, GraphGroup, RbsRandom, \
     AysFitResult, AysJournal, RbsData, ChannelingJournal, RbsJournal, get_rbs_journal, CmsJournal, RbsChannelingMap, \
-    CmsYield
+    CmsYield, HeatMap
 from waspy.iba.rbs_setup import RbsSetup
 from waspy.iba.rbs_yield_angle_fit import fit_and_smooth
 
@@ -25,7 +25,7 @@ def run_random(recipe: RbsRandom, rbs: RbsSetup) -> RbsJournal:
 
 
 def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> CmsJournal:
-    start_time=datetime.now()
+    start_time = datetime.now()
     rbs.move(recipe.start_position)
 
     zeta_angles = get_positions_as_float(recipe.zeta_coordinate_range)
@@ -43,12 +43,6 @@ def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> CmsJournal:
     end_time = datetime.now()
 
     return CmsJournal(start_time=start_time, end_time=end_time, cms_yields=cms_yields)
-
-
-def save_channeling_map_to_disk(file_writer, yields: List[CmsYield], title):
-    print(yields)
-    fig = plot_heat_map(yields, f"Channeling Map {title}")
-    file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{title}.png', fig)
 
 
 def run_channeling(recipe: RbsChanneling, rbs: RbsSetup,
@@ -85,6 +79,12 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
             raise CancelError("RBS Recipe was cancelled")
     rbs.finalize_acquisition()
     return rbs.get_status(True)
+
+
+def save_channeling_map_to_disk(file_writer, yields: List[CmsYield], title):
+    heat_map = HeatMap(title=title, yields=yields)
+    fig = plot_heat_map(heat_map)
+    file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)
 
 
 def save_channeling_graphs_to_disk(file_writer, channeling_result: ChannelingJournal, file_stem):
