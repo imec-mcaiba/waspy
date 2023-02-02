@@ -75,16 +75,16 @@ class AysJournal(BaseModel):
     fit: AysFitResult
 
 
-class CmsYield(BaseModel):
+class ChannelingMapYield(BaseModel):
     zeta: float
     theta: float
     energy_yield: int
 
 
-class CmsJournal(BaseModel):
+class ChannelingMapJournal(BaseModel):
     start_time: datetime
     end_time: datetime
-    cms_yields: List[CmsYield]
+    cms_yields: List[ChannelingMapYield]
 
 
 class ChannelingJournal(BaseModel):
@@ -108,7 +108,7 @@ class PositionCoordinates(BaseModel):
 
 class HeatMap(BaseModel):
     title: str
-    yields: List[CmsYield]
+    yields: List[ChannelingMapYield]
 
 
 class Graph(BaseModel):

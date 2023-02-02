@@ -97,7 +97,6 @@ class RbsJob(Job):
     def _run_channeling_map_recipe(self, recipe: RbsChannelingMap):
         journal = run_channeling_map(recipe, self._rbs_setup)
         save_channeling_map_to_disk(self._file_writer, journal.cms_yields, recipe.name)
-        print(journal)
         # TODO: log finish in db
 
     def _run_channeling_recipe(self, recipe: RbsChanneling):

@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-from waspy.iba.rbs_entities import RbsData, GraphGroup, AysFitResult, Graph, CmsYield, HeatMap
+from waspy.iba.rbs_entities import RbsData, GraphGroup, AysFitResult, Graph, ChannelingMapYield, HeatMap
 import matplotlib
 
 matplotlib.use('Agg')

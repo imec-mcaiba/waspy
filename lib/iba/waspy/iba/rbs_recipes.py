@@ -2,8 +2,6 @@ import logging
 from datetime import datetime
 from typing import List
 
-import matplotlib.pyplot as plt
-import numpy as np
 from scipy.optimize import OptimizeWarning
 
 from waspy.iba.file_handler import FileHandler
@@ -11,8 +9,9 @@ from waspy.iba.iba_error import CancelError
 from waspy.iba.rbs_plot import plot_energy_yields, plot_graph_group, plot_heat_map
 from waspy.iba.rbs_entities import get_positions_as_coordinate, CoordinateRange, Graph, Plot, \
     RbsChanneling, get_positions_as_float, Window, PositionCoordinates, GraphGroup, RbsRandom, \
-    AysFitResult, AysJournal, RbsData, ChannelingJournal, RbsJournal, get_rbs_journal, CmsJournal, RbsChannelingMap, \
-    CmsYield, HeatMap
+    AysFitResult, AysJournal, RbsData, ChannelingJournal, RbsJournal, get_rbs_journal, ChannelingMapJournal, \
+    RbsChannelingMap, \
+    ChannelingMapYield, HeatMap
 from waspy.iba.rbs_setup import RbsSetup
 from waspy.iba.rbs_yield_angle_fit import fit_and_smooth
 
@@ -24,7 +23,7 @@ def run_random(recipe: RbsRandom, rbs: RbsSetup) -> RbsJournal:
     return get_rbs_journal(rbs_data, start_time)
 
 
-def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> CmsJournal:
+def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> ChannelingMapJournal:
     start_time = datetime.now()
     rbs.move(recipe.start_position)
 
@@ -38,11 +37,11 @@ def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> CmsJournal:
             rbs_data = rbs.acquire_data(recipe.charge_total)
             histogram_data = rbs_data.histograms[recipe.optimize_detector_identifier]
             energy_yield = get_sum(histogram_data, recipe.yield_integration_window)
-            cms_yields.append(CmsYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
+            cms_yields.append(ChannelingMapYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
 
     end_time = datetime.now()
 
-    return CmsJournal(start_time=start_time, end_time=end_time, cms_yields=cms_yields)
+    return ChannelingMapJournal(start_time=start_time, end_time=end_time, cms_yields=cms_yields)
 
 
 def run_channeling(recipe: RbsChanneling, rbs: RbsSetup,
@@ -81,7 +80,7 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
     return rbs.get_status(True)
 
 
-def save_channeling_map_to_disk(file_writer, yields: List[CmsYield], title):
+def save_channeling_map_to_disk(file_writer, yields: List[ChannelingMapYield], title):
     heat_map = HeatMap(title=title, yields=yields)
     fig = plot_heat_map(heat_map)
     file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)
