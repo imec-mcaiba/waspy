@@ -84,6 +84,7 @@ class ChannelingMapYield(BaseModel):
 class ChannelingMapJournal(BaseModel):
     start_time: datetime
     end_time: datetime
+    rbs_journals: List[RbsJournal]
     cms_yields: List[ChannelingMapYield]
 
 

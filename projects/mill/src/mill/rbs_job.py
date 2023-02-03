@@ -11,7 +11,7 @@ from mill.job import Job
 
 from waspy.iba.file_handler import FileHandler
 from waspy.iba.rbs_recipes import run_random, run_channeling, save_rbs_journal, save_channeling_journal, \
-    run_channeling_map, save_channeling_map_to_disk
+    run_channeling_map, save_channeling_map_to_disk, save_channeling_map_journal
 from waspy.iba.rbs_setup import RbsSetup
 
 empty_recipe = RbsRandom(type="rbs_random", sample="", name="", charge_total=0,
@@ -96,7 +96,8 @@ class RbsJob(Job):
 
     def _run_channeling_map_recipe(self, recipe: RbsChannelingMap):
         journal = run_channeling_map(recipe, self._rbs_setup)
-        save_channeling_map_to_disk(self._file_writer, journal.cms_yields, recipe.name)
+        recipe_meta_data = self._recipe_meta.fill_rbs_recipe_meta()
+        save_channeling_map_journal(self._file_writer, recipe, journal, recipe_meta_data)
         # TODO: log finish in db
 
     def _run_channeling_recipe(self, recipe: RbsChanneling):
