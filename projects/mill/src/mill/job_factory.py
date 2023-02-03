@@ -150,10 +150,8 @@ def parse_channeling_map_recipe(recipe_section: Dict) -> Dict:
     setting.pop("theta_end")
     setting.pop("zeta_increment")
     setting.pop("theta_increment")
-    setting["yield_integration_window"] = {}
-    setting["yield_integration_window"]["start"] = setting["yield_window_start"]
+    setting["yield_integration_window"] = {"start": setting["yield_window_start"], "end": setting["yield_window_end"]}
     setting.pop("yield_window_start")
-    setting["yield_integration_window"]["end"] = setting["yield_window_end"]
     setting.pop("yield_window_end")
     return setting
 

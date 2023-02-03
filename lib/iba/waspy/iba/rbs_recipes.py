@@ -139,8 +139,10 @@ def save_channeling_map_journal(file_handler: FileHandler, recipe: RbsChanneling
                                         f'zeta{journal.cms_yields[rbs_index].zeta}_'
                                         f'theta{journal.cms_yields[rbs_index].theta}',
                                         recipe, rbs_journal, extra)
+    title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
+            f"{recipe.optimize_detector_identifier}"
+    save_channeling_map_to_disk(file_handler, journal.cms_yields, title)
     file_handler.cd_folder_up()
-    save_channeling_map_to_disk(file_handler, journal.cms_yields, recipe.name)
 
 
 def save_channeling_journal(file_handler: FileHandler, recipe: RbsChanneling, journal: ChannelingJournal, extra):
