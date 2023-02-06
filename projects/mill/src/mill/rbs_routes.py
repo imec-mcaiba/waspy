@@ -9,8 +9,9 @@ from mill.entities import CaenConfig
 from mill.mill_routes import build_get_redirect, build_post_redirect, build_histogram_redirect, \
     build_packed_histogram, build_detector_endpoints
 from mill.recipe_meta import RecipeMeta
-from waspy.iba.rbs_entities import PositionCoordinates
+from waspy.iba.rbs_entities import PositionCoordinates, Window
 from waspy.iba.rbs_setup import RbsSetup
+from scripts.create_channeling_map import create_channeling_map
 
 
 def build_driver_endpoints(http_server, rbs_hardware):
@@ -24,7 +25,7 @@ def build_driver_endpoints(http_server, rbs_hardware):
             build_detector_endpoints(http_server, daemon['proxy'], daemon['url'], caen_daemon.detectors, ["RBS"])
 
 
-def build_setup_endpoints(http_server, rbs_setup:RbsSetup):
+def build_setup_endpoints(http_server, rbs_setup: RbsSetup):
     @http_server.get("/api/rbs/status", tags=["RBS"], summary="Retrieves the rbs status")
     def get_rbs_status():
         return rbs_setup.get_status()
@@ -37,6 +38,11 @@ def build_setup_endpoints(http_server, rbs_setup:RbsSetup):
     @http_server.post("/api/rbs/position", tags=["RBS"], summary="Move the rbs setup to a specified position")
     def rbs_move(position: PositionCoordinates):
         rbs_setup.move(position)
+
+    @http_server.post("/api/rbs/create_channeling_map", tags=["RBS"], summary="Create channeling map from data in "
+                                                                              "given folder")
+    def rbs_create_channeling_map(window: Window, optimize_detector_identifier: str, data_files_dir: str):
+        create_channeling_map(window, optimize_detector_identifier, data_files_dir)
 
 
 def build_meta_endpoints(http_server, recipe_meta: RecipeMeta):
