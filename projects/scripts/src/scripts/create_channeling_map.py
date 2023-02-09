@@ -9,7 +9,7 @@ from waspy.iba.rbs_recipes import get_sum, save_channeling_map_to_disk
 from waspy.iba.file_handler import FileHandler
 
 
-def create_channeling_map(window: Window, optimize_detector_identifier: str, data_files_dir: str):
+def create_channeling_map():
     cms_yields = []
     unknown_recipe_str = "unknown_recipe"
     recipe_name = unknown_recipe_str
@@ -31,14 +31,15 @@ def create_channeling_map(window: Window, optimize_detector_identifier: str, dat
                     if yield_data:
                         data.append(int(yield_data.group(1)))
 
-            energy_yield = get_sum(data, window)
+            energy_yield = get_sum(data, energy_window)
             cms_yields.append(ChannelingMapYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
 
     assert recipe_name is not unknown_recipe_str, f"No recipe name found in {data_files_dir}."
 
     file_handler = FileHandler(Path(data_files_dir))
-    save_channeling_map_to_disk(file_handler, cms_yields,
-                                f"{recipe_name}_{window.start}_{window.end}_{optimize_detector_identifier}")
+    title = f"{recipe_name}_{energy_window.start}_{energy_window.end}_" \
+            f"{optimize_detector_identifier}"
+    save_channeling_map_to_disk(file_handler, "", cms_yields, title)
 
 
 if __name__ == "__main__":
@@ -46,7 +47,8 @@ if __name__ == "__main__":
     Usage:
     ======
     
-    $ venv/bin/python projects/scripts/src/scripts/create_channeling_map.py [minimum energy: int] [maximum energy: int] [detector: str] [folder: str] 
+    $ venv/bin/python projects/scripts/src/scripts/create_channeling_map.py [minimum energy: int] [maximum energy: int] 
+        [optimize_detector_identifier: str] [data_files_dir: str] 
     
     Example:
     $ venv/bin/python projects/scripts/src/scripts/create_channeling_map.py 10 900 d01 /tmp/ACQ/5_data/RBS22_084/AE200856_D07/ 
@@ -56,9 +58,9 @@ if __name__ == "__main__":
     assert len(sys.argv) == 5, f"Not enough arguments given. \n {usage}"
 
     energy_window = Window(start=sys.argv[1], end=sys.argv[2])
-    detector = sys.argv[3]
-    folder = sys.argv[4]
+    optimize_detector_identifier = sys.argv[3]
+    data_files_dir = sys.argv[4]
 
-    assert os.path.exists(folder), f"Folder {folder} does not exist."
+    assert os.path.exists(data_files_dir), f"Folder {data_files_dir} does not exist."
 
-    create_channeling_map(energy_window, detector, folder)
+    create_channeling_map()

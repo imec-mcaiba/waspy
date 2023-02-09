@@ -89,8 +89,8 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
     return rbs.get_status(True)
 
 
-def save_channeling_map_to_disk(file_writer, recipe: RbsChannelingMap, yields: List[ChannelingMapYield], title):
-    file_writer.cd_folder(recipe.name)
+def save_channeling_map_to_disk(file_writer, recipe_name: str, yields: List[ChannelingMapYield], title):
+    file_writer.cd_folder(recipe_name)
     heat_map = HeatMap(title=title, yields=yields)
     fig = plot_heat_map(heat_map)
     file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)

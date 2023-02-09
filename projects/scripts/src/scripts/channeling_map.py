@@ -109,4 +109,4 @@ if __name__ == "__main__":
     journal = run_channeling_map()
     title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
             f"{recipe.optimize_detector_identifier}"
-    save_channeling_map_to_disk(file_handler, recipe, journal.cms_yields, title)
+    save_channeling_map_to_disk(file_handler, recipe.name, journal.cms_yields, title)
