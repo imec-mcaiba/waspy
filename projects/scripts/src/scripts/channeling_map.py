@@ -9,7 +9,7 @@ from waspy.iba.rbs_entities import RbsChannelingMap, CoordinateRange, Window, Po
     get_positions_as_float, get_rbs_journal, ChannelingMapYield, RecipeType
 from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal
 from waspy.iba.rbs_setup import RbsSetup
-from mill.config import GlobalConfig, make_mill_config, MillConfig
+from mill.config import make_mill_config
 
 
 def run_channeling_map() -> ChannelingMapJournal:
