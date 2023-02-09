@@ -23,7 +23,7 @@ def run_random(recipe: RbsRandom, rbs: RbsSetup) -> RbsJournal:
     return get_rbs_journal(rbs_data, start_time)
 
 
-def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> ChannelingMapJournal:
+def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup, file_handler: FileHandler, recipe_meta_data) -> ChannelingMapJournal:
     start_time = datetime.now()
     rbs.move(recipe.start_position)
 
@@ -31,6 +31,7 @@ def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> ChannelingMap
     theta_angles = get_positions_as_float(recipe.theta_coordinate_range)
     rbs_journals = []
     cms_yields = []
+    rbs_index = 0
 
     for zeta in zeta_angles:
         for theta in theta_angles:
@@ -42,10 +43,14 @@ def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup) -> ChannelingMap
             rbs_journals.append(rbs_journal)
             energy_yield = get_sum(histogram_data, recipe.yield_integration_window)
             cms_yields.append(ChannelingMapYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
+            save_channeling_map_journal(file_handler, recipe, rbs_journal, zeta, theta, rbs_index, recipe_meta_data)
+            rbs_index += 1
+        rbs_index += 1
 
     end_time = datetime.now()
 
-    return ChannelingMapJournal(start_time=start_time, end_time=end_time, rbs_journals=rbs_journals, cms_yields=cms_yields)
+    return ChannelingMapJournal(start_time=start_time, end_time=end_time, rbs_journals=rbs_journals,
+                                cms_yields=cms_yields)
 
 
 def run_channeling(recipe: RbsChanneling, rbs: RbsSetup,
@@ -84,10 +89,12 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
     return rbs.get_status(True)
 
 
-def save_channeling_map_to_disk(file_writer, yields: List[ChannelingMapYield], title):
+def save_channeling_map_to_disk(file_writer, recipe: RbsChannelingMap, yields: List[ChannelingMapYield], title):
+    file_writer.cd_folder(recipe.name)
     heat_map = HeatMap(title=title, yields=yields)
     fig = plot_heat_map(heat_map)
     file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)
+    file_writer.cd_folder_up()
 
 
 def save_channeling_graphs_to_disk(file_writer, channeling_result: ChannelingJournal, file_stem):
@@ -120,7 +127,8 @@ def save_rbs_journal(file_handler: FileHandler, recipe: RbsRandom, journal: RbsJ
     save_rbs_journal_with_file_stem(file_handler, recipe.name, recipe, journal, extra)
 
 
-def save_rbs_journal_with_file_stem(file_writer: FileHandler, file_stem, recipe: RbsChanneling | RbsRandom | RbsChannelingMap,
+def save_rbs_journal_with_file_stem(file_writer: FileHandler, file_stem,
+                                    recipe: RbsChanneling | RbsRandom | RbsChannelingMap,
                                     journal: RbsJournal, extra):
     for [detector, histogram] in journal.histograms.items():
         title = f'{file_stem}_{detector}.txt'
@@ -130,18 +138,14 @@ def save_rbs_journal_with_file_stem(file_writer: FileHandler, file_stem, recipe:
     save_rbs_graph_to_disk(file_writer, journal, file_stem)
 
 
-def save_channeling_map_journal(file_handler: FileHandler, recipe: RbsChannelingMap, journal: ChannelingMapJournal, extra):
+def save_channeling_map_journal(file_handler: FileHandler, recipe: RbsChannelingMap, journal: RbsJournal, zeta, theta,
+                                rbs_index, recipe_meta_data):
     file_handler.cd_folder(recipe.name)
-
-    for rbs_index, rbs_journal in enumerate(journal.rbs_journals):
-        save_rbs_journal_with_file_stem(file_handler,
-                                        f'{rbs_index:02}_{recipe.name}_'
-                                        f'zeta{journal.cms_yields[rbs_index].zeta}_'
-                                        f'theta{journal.cms_yields[rbs_index].theta}',
-                                        recipe, rbs_journal, extra)
-    title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
-            f"{recipe.optimize_detector_identifier}"
-    save_channeling_map_to_disk(file_handler, journal.cms_yields, title)
+    save_rbs_journal_with_file_stem(file_handler,
+                                    f'{rbs_index:02}_{recipe.name}_'
+                                    f'zeta{zeta}_'
+                                    f'theta{theta}',
+                                    recipe, journal, recipe_meta_data)
     file_handler.cd_folder_up()
 
 
