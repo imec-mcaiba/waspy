@@ -14,7 +14,7 @@ pastel_red = "#ff7c70"
 
 
 class GlobalConfig(BaseSettings):
-    G64_url = "http://169.254.150.100/hive/api/any/g64"
+    G64_url = "http://169.254.150.100:8000/api/any/g64"
 
 
 env_config = GlobalConfig()
