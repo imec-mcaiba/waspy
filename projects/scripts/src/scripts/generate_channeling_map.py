@@ -47,11 +47,11 @@ if __name__ == "__main__":
     Usage:
     ======
     
-    $ venv/bin/python projects/scripts/src/scripts/create_channeling_map.py [minimum energy: int] [maximum energy: int] 
+    $ venv/bin/python projects/scripts/src/scripts/generate_channeling_map.py [minimum energy: int] [maximum energy: int] 
         [optimize_detector_identifier: str] [data_files_dir: str] 
     
     Example:
-    $ venv/bin/python projects/scripts/src/scripts/create_channeling_map.py 10 900 d01 /tmp/ACQ/5_data/RBS22_084/AE200856_D07/ 
+    $ venv/bin/python projects/scripts/src/scripts/generate_channeling_map.py 10 900 d01 /tmp/ACQ/5_data/RBS22_084/AE200856_D07/ 
     
     """
 
