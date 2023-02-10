@@ -17,7 +17,7 @@ from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
 
 
-log_label = "[WASPY.SCRIPTS.CHANNELING_EXPERIMENT]"
+log_label = "[WASPY.SCRIPTS.CHANNELING_MEASUREMENT]"
 
 
 def ays_report_cb(ays_result: AysJournal):
