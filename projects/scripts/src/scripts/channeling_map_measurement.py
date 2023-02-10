@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from waspy.iba.rbs_entities import RbsChannelingMap, CoordinateRange, Window, Po
 from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal
 from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
+
+log_label = "[WASPY.SCRIPTS.CHANNELING_MAP_MEASUREMENT]"
 
 
 def run_channeling_map() -> ChannelingMapJournal:
@@ -82,7 +85,7 @@ if __name__ == "__main__":
     file_handler = FileHandler(local_dir, remote_dir)
     file_handler.set_base_folder(base_folder)
     recipe_meta_data = RecipeMeta(logbook_db, recipe_meta_dir)
-    print(f"FILES ARE SAVED IN {os.path.join(local_dir, base_folder)} AND {os.path.join(remote_dir, base_folder)}")
+    logging.info(f"{log_label} Files are saved in {os.path.join(local_dir, base_folder)} and {os.path.join(remote_dir, base_folder)}")
 
     """=============================== EDITABLE ==========================================
     Recipe parameters
