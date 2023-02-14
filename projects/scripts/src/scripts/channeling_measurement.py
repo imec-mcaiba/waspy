@@ -11,7 +11,7 @@ from waspy.iba.rbs_entities import CoordinateRange, Window, PositionCoordinates,
     get_positions_as_float, get_rbs_journal, RecipeType, RbsChanneling, \
     ChannelingJournal, AysJournal, AysFitResult
 from waspy.iba.rbs_recipes import get_sum, \
-    save_channeling_graphs_to_disk, save_rbs_journal_with_file_stem, run_rbs_recipe, run_ays, find_minimum, \
+    save_channeling_graphs_to_disk, save_rbs_journal_with_file_stem, run_rbs_recipe, find_minimum, \
     convert_float_to_coordinate, save_ays_journal
 from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
