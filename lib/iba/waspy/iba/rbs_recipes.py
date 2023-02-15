@@ -37,9 +37,11 @@ def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup, file_handler: Fi
         for theta in theta_angles:
             rbs.move(PositionCoordinates(zeta=zeta, theta=theta))
             cms_step_start_time = datetime.now()
+            rbs.prepare_acquisition()
             rbs_data = rbs.acquire_data(recipe.charge_total)
             if rbs.cancelled():
                 raise CancelError("RBS Recipe was cancelled")
+            rbs.finalize_acquisition()
             histogram_data = rbs_data.histograms[recipe.optimize_detector_identifier]
             rbs_journal = get_rbs_journal(rbs_data, cms_step_start_time)
             rbs_journals.append(rbs_journal)

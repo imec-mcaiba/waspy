@@ -6,6 +6,7 @@ from pathlib import Path
 from mill.logbook_db import LogBookDb
 from mill.recipe_meta import RecipeMeta
 from waspy.iba.file_handler import FileHandler
+from waspy.iba.iba_error import CancelError
 from waspy.iba.rbs_entities import RbsChannelingMap, CoordinateRange, Window, PositionCoordinates, ChannelingMapJournal, \
     get_positions_as_float, get_rbs_journal, ChannelingMapYield, RecipeType
 from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal
@@ -35,7 +36,13 @@ def run_channeling_map() -> ChannelingMapJournal:
         for theta in theta_angles:
             rbs_setup.move(PositionCoordinates(zeta=zeta, theta=theta))
             cms_step_start_time = datetime.now()
+
+            rbs_setup.prepare_acquisition()
             rbs_data = rbs_setup.acquire_data(recipe.charge_total)
+            if rbs_setup.cancelled():
+                raise CancelError("RBS Recipe was cancelled")
+            rbs_setup.finalize_acquisition()
+
             histogram_data = rbs_data.histograms[recipe.optimize_detector_identifier]
             rbs_journal = get_rbs_journal(rbs_data, cms_step_start_time)
             rbs_journals.append(rbs_journal)
@@ -63,7 +70,7 @@ if __name__ == "__main__":
     * base_folder:      Sub-folder in local_dir and remote_dir
     """
     # config_file = "../../../mill/default_config.toml"  # Local development
-    config_file = "../../../mill/lab_config.toml"  # Lab measurements
+    config_file = "../../../mill/lab_config_win.toml"  # Lab measurements
     # logbook_url = "http://127.0.0.1:8001"  # Local development
     logbook_url = "https://db.capitan.imec.be"  # Lab measurements
     recipe_meta_dir = Path('../../../mill/recipe_meta')
@@ -72,9 +79,10 @@ if __name__ == "__main__":
     logbook_db = LogBookDb(logbook_url)  # Do not modify!
 
     # local_dir = mill_config.rbs.local_dir  # Linux environment
-    local_dir = Path("/some/local/dir")
+    local_dir = Path(r"C:\git\data")
     # remote_dir = mill_config.rbs.remote_dir  # Linux environment
-    remote_dir = Path("/some/remote/dir")
+    remote_dir = Path(r"\\winbe.imec.be\wasp\transfer_RBS")
+    # base_folder = ""
     base_folder = "channeling_map"
 
     """===================================================================================
@@ -96,13 +104,13 @@ if __name__ == "__main__":
     """
     recipe = RbsChannelingMap(
         type=RecipeType.CHANNELING_MAP,
-        sample="sample1",
-        name="name1",
-        start_position=PositionCoordinates(x=0, y=0, phi=0, zeta=-2, detector=0, theta=-2),
-        charge_total=2000,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=1),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=1),
-        yield_integration_window=Window(start=0, end=200),
+        sample="AE228306D19",
+        name="RBS23_004_01B",
+        start_position=PositionCoordinates(x=10, y=10, phi=10, zeta=-2, detector=170, theta=-2),
+        charge_total=400,
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=0.2),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=0.2),
+        yield_integration_window=Window(start=400, end=430),
         optimize_detector_identifier="d01"
     )
     """===================================================================================
