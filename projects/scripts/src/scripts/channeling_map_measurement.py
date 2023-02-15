@@ -59,7 +59,8 @@ def run_channeling_map() -> ChannelingMapJournal:
 
 
 if __name__ == "__main__":
-    """=============================== EDITABLE ==========================================
+    """
+    =============================== EDITABLE ==========================================
     Configuration of measurement
     
     * config_file:      File with URLs of drivers and directories
@@ -69,52 +70,53 @@ if __name__ == "__main__":
     * remote_dir:       Remote directory to save data files in
     * base_folder:      Sub-folder in local_dir and remote_dir
     """
-    # config_file = "../../../mill/default_config.toml"  # Local development
-    config_file = "../../../mill/lab_config_win.toml"  # Lab measurements
-    # logbook_url = "http://127.0.0.1:8001"  # Local development
-    logbook_url = "https://db.capitan.imec.be"  # Lab measurements
-    recipe_meta_dir = Path('../../../mill/recipe_meta')
+    development_mode = 1  # 0: lab measurements, 1: development
+    if development_mode:
+        config_file = "../../../mill/default_config.toml"
+        logbook_url = "http://127.0.0.1:8001"
+        mill_config = make_mill_config(config_file)  # Do not modify!
+        local_dir = mill_config.rbs.local_dir  # Linux
+        remote_dir = mill_config.rbs.remote_dir  # Linux
+    else:
+        config_file = "../../../mill/lab_config_win.toml"  # Windows PC
+        logbook_url = "https://db.capitan.imec.be"
+        local_dir = Path(r"C:\git\data")
+        remote_dir = Path(r"\\winbe.imec.be\wasp\transfer_RBS")
+        mill_config = make_mill_config(config_file)  # Do not modify!
 
-    mill_config = make_mill_config(config_file)  # Do not modify!
+    recipe_meta_dir = Path('../../../mill/recipe_meta')
     logbook_db = LogBookDb(logbook_url)  # Do not modify!
 
-    # local_dir = mill_config.rbs.local_dir  # Linux environment
-    local_dir = Path(r"C:\git\data")
-    # remote_dir = mill_config.rbs.remote_dir  # Linux environment
-    remote_dir = Path(r"\\winbe.imec.be\wasp\transfer_RBS")
-    # base_folder = ""
-    base_folder = "channeling_map"
-
-    """===================================================================================
-    """
-
-    rbs_setup = RbsSetup(mill_config.rbs.get_driver_urls())
-    rbs_setup.configure_detectors(mill_config.rbs.drivers.caen.detectors)
-    file_handler = FileHandler(local_dir, remote_dir)
-    file_handler.set_base_folder(base_folder)
-    recipe_meta_data = RecipeMeta(logbook_db, recipe_meta_dir)
-    logging.info(f"{log_label} Files are saved in {os.path.join(local_dir, base_folder)} and {os.path.join(remote_dir, base_folder)}")
-
-    """=============================== EDITABLE ==========================================
+    """        
     Recipe parameters
-        
+
     Following fields are optional, i.e. you can leave them out if they don't need to change
      - start_position
      - all coordinates in PositionCoordinates
     """
     recipe = RbsChannelingMap(
         type=RecipeType.CHANNELING_MAP,
-        sample="AE228306D19",
-        name="RBS23_004_01B",
+        sample="sample1",
+        name="RBS23_00X",
         start_position=PositionCoordinates(x=10, y=10, phi=10, zeta=-2, detector=170, theta=-2),
         charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=0.2),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=0.2),
-        yield_integration_window=Window(start=400, end=430),
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=4),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=4),
+        yield_integration_window=Window(start=0, end=430),
         optimize_detector_identifier="d01"
     )
-    """===================================================================================
     """
+    ===================================================================================
+    ===================================================================================
+    """
+
+    rbs_setup = RbsSetup(mill_config.rbs.get_driver_urls())
+    rbs_setup.configure_detectors(mill_config.rbs.drivers.caen.detectors)
+    file_handler = FileHandler(local_dir, remote_dir)
+    file_handler.set_base_folder(recipe.name)
+    recipe_meta_data = RecipeMeta(logbook_db, recipe_meta_dir)
+    logging.info(
+        f"{log_label} Files are saved in {os.path.join(local_dir, recipe.name)} and {os.path.join(remote_dir, recipe.name)}")
 
     recipe_meta_data = recipe_meta_data.fill_rbs_recipe_meta()
     journal = run_channeling_map()

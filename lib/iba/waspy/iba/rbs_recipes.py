@@ -94,11 +94,11 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
 
 
 def save_channeling_map_to_disk(file_writer, recipe_name: str, yields: List[ChannelingMapYield], title):
-    file_writer.cd_folder(recipe_name)
+    # file_writer.cd_folder(recipe_name)
     heat_map = HeatMap(title=title, yields=yields)
     fig = plot_heat_map(heat_map)
     file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)
-    file_writer.cd_folder_up()
+    # file_writer.cd_folder_up()
 
 
 def save_channeling_graphs_to_disk(file_writer, channeling_result: ChannelingJournal, file_stem):
@@ -144,13 +144,13 @@ def save_rbs_journal_with_file_stem(file_writer: FileHandler, file_stem,
 
 def save_channeling_map_journal(file_handler: FileHandler, recipe: RbsChannelingMap, journal: RbsJournal, zeta, theta,
                                 rbs_index, recipe_meta_data):
-    file_handler.cd_folder(recipe.name)
+    # file_handler.cd_folder(recipe.name)
     save_rbs_journal_with_file_stem(file_handler,
                                     f'{rbs_index:02}_{recipe.name}_'
                                     f'zeta{zeta}_'
                                     f'theta{theta}',
                                     recipe, journal, recipe_meta_data)
-    file_handler.cd_folder_up()
+    # file_handler.cd_folder_up()
 
 
 def save_channeling_journal(file_handler: FileHandler, recipe: RbsChanneling, journal: ChannelingJournal, extra):
