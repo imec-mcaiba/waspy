@@ -50,7 +50,6 @@ def run_channeling_map() -> ChannelingMapJournal:
             cms_yields.append(ChannelingMapYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
             save_channeling_map_journal(file_handler, recipe, rbs_journal, zeta, theta, rbs_index, recipe_meta_data)
             rbs_index += 1
-        rbs_index += 1
 
     end_time = datetime.now()
 
