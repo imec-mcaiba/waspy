@@ -71,10 +71,10 @@ if __name__ == "__main__":
     mill_config = make_mill_config(config_file)  # Do not modify!
     logbook_db = LogBookDb(logbook_url)  # Do not modify!
 
-    local_dir = mill_config.rbs.local_dir
-    # local_dir = Path("/some/local/dir")
-    remote_dir = mill_config.rbs.remote_dir
-    # remote_dir = Path("/some/remote/dir")
+    # local_dir = mill_config.rbs.local_dir  # Linux environment
+    local_dir = Path("/some/local/dir")
+    # remote_dir = mill_config.rbs.remote_dir  # Linux environment
+    remote_dir = Path("/some/remote/dir")
     base_folder = "channeling_map"
 
     """===================================================================================
