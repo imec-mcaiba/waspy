@@ -62,10 +62,10 @@ if __name__ == "__main__":
     * remote_dir:       Remote directory to save data files in
     * base_folder:      Sub-folder in local_dir and remote_dir
     """
-    config_file = "../../../mill/default_config.toml"  # Local development
-    # config_file = "../../../mill/lab_config.toml"  # Lab measurements
-    logbook_url = "http://127.0.0.1:8001"  # Local development
-    # logbook_url = "https://db.capitan.imec.be"  # Lab measurements
+    # config_file = "../../../mill/default_config.toml"  # Local development
+    config_file = "../../../mill/lab_config.toml"  # Lab measurements
+    # logbook_url = "http://127.0.0.1:8001"  # Local development
+    logbook_url = "https://db.capitan.imec.be"  # Lab measurements
     recipe_meta_dir = Path('../../../mill/recipe_meta')
 
     mill_config = make_mill_config(config_file)  # Do not modify!
