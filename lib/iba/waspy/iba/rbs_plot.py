@@ -40,7 +40,7 @@ def plot_heat_map(heat_map: HeatMap) -> Figure:
             y_axis.append(cms_yield.zeta)
 
     x_axis.sort()
-    y_axis.sort()
+    y_axis.sort(reverse=True)
 
     data = np.empty(shape=(len(y_axis), len(x_axis)), dtype=int)
     for cms_yield in heat_map.yields:

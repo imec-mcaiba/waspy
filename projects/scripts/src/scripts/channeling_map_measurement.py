@@ -71,6 +71,8 @@ if __name__ == "__main__":
     """
     development_mode = 1  # 0: lab measurements, 1: development
     if development_mode:
+        logging.info(
+            f"{log_label} You are running this script in development mode!")
         config_file = "../../../mill/default_config.toml"
         logbook_url = "http://127.0.0.1:8001"
         mill_config = make_mill_config(config_file)  # Do not modify!
@@ -99,9 +101,9 @@ if __name__ == "__main__":
         name="RBS23_00X",
         start_position=PositionCoordinates(x=10, y=10, phi=10, zeta=-2, detector=170, theta=-2),
         charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=4),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=4),
-        yield_integration_window=Window(start=0, end=430),
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=0.2),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=0.2),
+        yield_integration_window=Window(start=400, end=430),
         optimize_detector_identifier="d01"
     )
     """
