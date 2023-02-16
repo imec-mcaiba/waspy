@@ -134,6 +134,11 @@ def parse_channeling_recipe(recipe_section: Dict) -> Dict:
     setting.pop("ays_window_start")
     setting["yield_integration_window"]["end"] = setting["ays_window_end"]
     setting.pop("ays_window_end")
+    try:
+        setting["fit_algorithm_type"] = setting["fit_algorithm_type"]
+    except KeyError:
+        setting["fit_algorithm_type"] = "lower_fit"
+
     return setting
 
 

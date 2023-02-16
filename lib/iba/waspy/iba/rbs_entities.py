@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Optional, Literal, Callable
+from typing import List, Dict, Optional, Literal, Callable, Union
 
 import numpy as np
 from pydantic import BaseModel, Field, validator
@@ -163,6 +163,12 @@ class CoordinateEnum(str, Enum):
     none = "none"
 
 
+class FitAlgorithmType(str, Enum):
+    MINIMUM_YIELD = "minimum_yield"
+    LOWER_FIT = "lower_fit"
+    STD_FIT = "std_fit"
+
+
 class CoordinateRange(BaseModel):
     name: CoordinateEnum
     start: float
@@ -232,6 +238,7 @@ class RbsChanneling(BaseModel):
     yield_optimize_detector_identifier: str
     compare_charge_total: int
     random_coordinate_range: CoordinateRange
+    fit_algorithm_type: FitAlgorithmType
 
     class Config:
         extra = 'forbid'

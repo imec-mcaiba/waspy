@@ -205,7 +205,7 @@ def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(
             rbs_journals.append(rbs_journal)
             yields.append(get_sum(rbs_journal.histograms[recipe.yield_optimize_detector_identifier],
                                   recipe.yield_integration_window))
-        fit_result = find_minimum(angles, yields)
+        fit_result = find_minimum(angles, yields, recipe.fit_algorithm_type)
         if fit_result.success:
             logging.info(f"[WASPY.IBA.RBS_RECIPES] Minimum found at {coordinate_range.name}={fit_result.minimum}")
             rbs.move(convert_float_to_coordinate(coordinate_range.name, fit_result.minimum))
@@ -217,9 +217,9 @@ def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(
     return result
 
 
-def find_minimum(angles, yields) -> AysFitResult:
+def find_minimum(angles, yields, fit_algorithm_type) -> AysFitResult:
     try:
-        fit_func, min_angle = fit_and_smooth(angles, yields)
+        fit_func, min_angle = fit_and_smooth(angles, yields, fit_algorithm_type)
         return AysFitResult(success=True, minimum=min_angle, discrete_angles=angles,
                             discrete_yields=yields, fit_func=fit_func)
     except (RuntimeError, OptimizeWarning, ValueError) as e:

@@ -85,6 +85,7 @@ class RbsJobModel(BaseModel):
                             "optimize_detector_identifier": "d01",
                             "random_fixed_charge_total": 1000,
                             "random_vary_coordinate": {"name": "phi", "start": 0, "end": 30, "increment": 2},
+                            "fit_algorithm_type": "lower_fit"
 
                         },
                         {
