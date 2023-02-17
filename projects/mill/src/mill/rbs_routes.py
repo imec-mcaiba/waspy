@@ -11,7 +11,7 @@ from mill.mill_routes import build_get_redirect, build_post_redirect, build_hist
 from mill.recipe_meta import RecipeMeta
 from waspy.iba.rbs_entities import PositionCoordinates, Window
 from waspy.iba.rbs_setup import RbsSetup
-from scripts.generate_channeling_map import create_channeling_map
+from scripts.channeling_map_generator import create_channeling_map
 
 
 def build_driver_endpoints(http_server, rbs_hardware):
