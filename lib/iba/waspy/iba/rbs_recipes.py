@@ -11,7 +11,7 @@ from waspy.iba.rbs_entities import get_positions_as_coordinate, CoordinateRange,
     RbsChanneling, get_positions_as_float, Window, PositionCoordinates, GraphGroup, RbsRandom, \
     AysFitResult, AysJournal, RbsData, ChannelingJournal, RbsJournal, get_rbs_journal, ChannelingMapJournal, \
     RbsChannelingMap, \
-    ChannelingMapYield, HeatMap
+    ChannelingMapYield, HeatMap, FitAlgorithmType
 from waspy.iba.rbs_setup import RbsSetup
 from waspy.iba.rbs_yield_angle_fit import fit_and_smooth
 
@@ -155,7 +155,8 @@ def save_channeling_map_journal(file_handler: FileHandler, recipe: RbsChanneling
     # file_handler.cd_folder_up()
 
 
-def save_ays_journal(file_handler: FileHandler, recipe: RbsChanneling, ays_journal: AysJournal, ays_index, extra, fit_algorithm_type):
+def save_ays_journal(file_handler: FileHandler, recipe: RbsChanneling, ays_journal: AysJournal, ays_index, extra,
+                     fit_algorithm_type=FitAlgorithmType.LOWER_FIT):
     yield_coordinate_range = recipe.yield_coordinate_ranges[ays_index]
     coordinate_ranging = yield_coordinate_range.name
     positions = get_positions_as_float(yield_coordinate_range)
@@ -216,7 +217,7 @@ def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(
     return result
 
 
-def find_minimum(angles, yields, fit_algorithm_type) -> AysFitResult:
+def find_minimum(angles, yields, fit_algorithm_type=FitAlgorithmType.LOWER_FIT) -> AysFitResult:
     try:
         fit_func, min_angle = fit_and_smooth(angles, yields, fit_algorithm_type)
         return AysFitResult(success=True, minimum=min_angle, discrete_angles=angles,
