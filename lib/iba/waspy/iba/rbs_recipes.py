@@ -57,24 +57,26 @@ def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup, file_handler: Fi
                                 cms_yields=cms_yields)
 
 
-def run_channeling(recipe: RbsChanneling, rbs: RbsSetup,
+def run_channeling(recipe: RbsChanneling, rbs: RbsSetup, file_handler: FileHandler, recipe_meta_data,
                    ays_report_cb: callable(AysJournal) = None) -> ChannelingJournal:
     rbs.move(recipe.start_position)
 
     logging.info("[WASPY.IBA.RBS_RECIPES] Start ays")
-    ays = run_ays(recipe, rbs, ays_report_cb)
+    ays = run_ays(recipe, rbs, ays_report_cb, file_handler, recipe_meta_data)
 
     logging.info("[WASPY.IBA.RBS_RECIPES] Start Fixed")
     start_time = datetime.now()
     rbs.prepare_acquisition()
     fixed_data = rbs.acquire_data(recipe.compare_charge_total)
     fixed = get_rbs_journal(fixed_data, start_time)
+    save_rbs_journal_with_file_stem(file_handler, recipe.name + "_fixed", recipe, fixed, recipe_meta_data)
 
     logging.info("[WASPY.IBA.RBS_RECIPES] Start Random")
     rbs.move(PositionCoordinates(theta=-2))
     start_time = datetime.now()
     random_data = run_rbs_recipe(recipe.random_coordinate_range, recipe.compare_charge_total, rbs)
     random = get_rbs_journal(random_data, start_time)
+    save_rbs_journal_with_file_stem(file_handler, recipe.name + "_random", recipe, random, recipe_meta_data)
 
     return ChannelingJournal(random=random, fixed=fixed, ays=ays, title=recipe.name)
 
@@ -153,32 +155,27 @@ def save_channeling_map_journal(file_handler: FileHandler, recipe: RbsChanneling
     # file_handler.cd_folder_up()
 
 
-def save_channeling_journal(file_handler: FileHandler, recipe: RbsChanneling, journal: ChannelingJournal, extra):
-    for ays_index, ays_journal in enumerate(journal.ays):
-        yield_coordinate_range = recipe.yield_coordinate_ranges[ays_index]
-        coordinate_ranging = yield_coordinate_range.name
-        positions = get_positions_as_float(yield_coordinate_range)
-        name = f'{recipe.name}_{ays_index}_{coordinate_ranging}'
-        file_handler.cd_folder(name)
-        for rbs_index, rbs_journal in enumerate(ays_journal.rbs_journals):
-            save_rbs_journal_with_file_stem(file_handler, f'{rbs_index:02}_{name}_{positions[rbs_index]}', recipe,
-                                            rbs_journal, extra)
-        text = serialize_energy_yields(ays_journal.fit)
-        file_handler.write_text_to_disk(f'_{name}_yields.txt', text)
+def save_ays_journal(file_handler: FileHandler, recipe: RbsChanneling, ays_journal: AysJournal, ays_index, extra, fit_algorithm_type):
+    yield_coordinate_range = recipe.yield_coordinate_ranges[ays_index]
+    coordinate_ranging = yield_coordinate_range.name
+    positions = get_positions_as_float(yield_coordinate_range)
+    name = f'{recipe.name}_{ays_index}_{coordinate_ranging}'
+    file_handler.cd_folder(name)
+    for rbs_index, rbs_journal in enumerate(ays_journal.rbs_journals):
+        save_rbs_journal_with_file_stem(file_handler, f'{rbs_index:02}_{name}_{positions[rbs_index]}', recipe,
+                                        rbs_journal, extra)
+    text = serialize_energy_yields(ays_journal.fit)
+    file_handler.write_text_to_disk(f'_{name}_yields.txt', text)
 
-        file_name = f'_{name}'
-        if ays_journal.fit.success:
-            fig = plot_energy_yields(name, ays_journal.fit)
-            file_handler.write_matplotlib_fig_to_disk(f'{file_name}.png', fig)
-        else:
-            file_handler.write_text_to_disk(f'{file_name}.txt', "Fitting failed")
-            file_handler.cd_folder_up()
-            return
+    file_name = f'_{name}'
+    if ays_journal.fit.success:
+        fig = plot_energy_yields(name, ays_journal.fit, fit_algorithm_type)
+        file_handler.write_matplotlib_fig_to_disk(f'{file_name}.png', fig)
+    else:
+        file_handler.write_text_to_disk(f'{file_name}.txt', "Fitting failed")
         file_handler.cd_folder_up()
-
-    save_rbs_journal_with_file_stem(file_handler, recipe.name + "_fixed", recipe, journal.fixed, extra)
-    save_rbs_journal_with_file_stem(file_handler, recipe.name + "_random", recipe, journal.random, extra)
-    save_channeling_graphs_to_disk(file_handler, journal, recipe.name)
+        return
+    file_handler.cd_folder_up()
 
 
 def serialize_energy_yields(fit_data: AysFitResult) -> str:
@@ -188,12 +185,12 @@ def serialize_energy_yields(fit_data: AysFitResult) -> str:
     return text
 
 
-def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(AysJournal)) -> List[AysJournal]:
+def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(AysJournal), file_handler, recipe_meta_data) -> List[AysJournal]:
     """ays: angular yield scan"""
     start_time = datetime.now()
     result = []
     logging.info(f"[WASPY.IBA.RBS_RECIPES] YIELD COORD RANGES {recipe.yield_coordinate_ranges}")
-    for coordinate_range in recipe.yield_coordinate_ranges:
+    for ays_index, coordinate_range in enumerate(recipe.yield_coordinate_ranges):
         rbs_journals = []
         yields = []
         angles = get_positions_as_float(coordinate_range)
@@ -209,10 +206,12 @@ def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(
         if fit_result.success:
             logging.info(f"[WASPY.IBA.RBS_RECIPES] Minimum found at {coordinate_range.name}={fit_result.minimum}")
             rbs.move(convert_float_to_coordinate(coordinate_range.name, fit_result.minimum))
-        result.append(AysJournal(start_time=start_time, end_time=datetime.now(), rbs_journals=rbs_journals,
-                                 fit=fit_result))
+        ays_journal = AysJournal(start_time=start_time, end_time=datetime.now(), rbs_journals=rbs_journals,
+                                 fit=fit_result)
+        result.append(ays_journal)
         if ays_report_callback:
             ays_report_callback(result[-1])
+        save_ays_journal(file_handler, recipe, ays_journal, ays_index, recipe_meta_data, recipe.fit_algorithm_type)
 
     return result
 

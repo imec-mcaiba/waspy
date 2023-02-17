@@ -97,12 +97,12 @@ if __name__ == "__main__":
     """
     recipe = RbsChannelingMap(
         type=RecipeType.CHANNELING_MAP,
-        sample="sample1",
+        sample="sample2",
         name="RBS23_00X",
         start_position=PositionCoordinates(x=10, y=10, phi=10, zeta=-2, detector=170, theta=-2),
         charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=0.2),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=0.2),
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
         yield_integration_window=Window(start=400, end=430),
         optimize_detector_identifier="d01"
     )
