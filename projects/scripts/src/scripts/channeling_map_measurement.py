@@ -32,8 +32,11 @@ def run_channeling_map() -> ChannelingMapJournal:
     cms_yields = []
     rbs_index = 0
 
+    total_amount = len(zeta_angles)*len(theta_angles)
+
     for zeta in zeta_angles:
         for theta in theta_angles:
+            logging.info(f"{log_label} Measurement {rbs_index + 1}/{total_amount}")
             rbs_setup.move(PositionCoordinates(zeta=zeta, theta=theta))
             cms_step_start_time = datetime.now()
 
@@ -99,7 +102,7 @@ if __name__ == "__main__":
         type=RecipeType.CHANNELING_MAP,
         sample="sample2",
         name="RBS23_00X",
-        start_position=PositionCoordinates(x=10, y=10, phi=10, zeta=-2, detector=170, theta=-2),
+        start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
         charge_total=400,
         zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
         theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
@@ -124,3 +127,5 @@ if __name__ == "__main__":
     title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
             f"{recipe.optimize_detector_identifier}"
     save_channeling_map_to_disk(file_handler, recipe.name, journal.cms_yields, title)
+
+    logging.info(f"{log_label} All measurements completed!")
