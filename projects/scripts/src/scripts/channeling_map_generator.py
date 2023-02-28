@@ -18,10 +18,12 @@ def create_channeling_map():
     assert glob.glob(file_search_str), f"Files do not exist, {file_search_str}. Check if detector name is correct."
 
     for file in glob.glob(file_search_str):
-        reg_exp_file = f"{data_files_dir}\/?\d*_(\S*)_zeta(\S*)_theta(\S*)_{optimize_detector_identifier}\.txt"
-        recipe_name, zeta, theta = re.search(reg_exp_file, file).groups()
+        files_dir = data_files_dir.replace("\\", "\\\\")
+        reg_exp_file = f"{files_dir}\/?\\\\\d*_(\S*)_zeta(\S*)_theta(\S*)_{optimize_detector_identifier}\.txt"
+        found = re.search(reg_exp_file, file)
 
-        if recipe_name and zeta and theta:
+        if found:
+            recipe_name, zeta, theta = found.groups()
             data = []
             with open(file) as f:
                 lines = f.readlines()
@@ -33,6 +35,7 @@ def create_channeling_map():
 
             energy_yield = get_sum(data, energy_window)
             cms_yields.append(ChannelingMapYield(zeta=zeta, theta=theta, energy_yield=energy_yield))
+
 
     assert recipe_name is not unknown_recipe_str, f"No recipe name found in {data_files_dir}."
 

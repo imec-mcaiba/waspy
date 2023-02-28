@@ -43,9 +43,10 @@ def plot_heat_map(heat_map: HeatMap) -> Figure:
     x_axis.sort()
     y_axis.sort(reverse=True)
 
-    data = np.empty(shape=(len(y_axis), len(x_axis)), dtype=int)
+    data = np.zeros(shape=(len(y_axis), len(x_axis)), dtype=int)
     for cms_yield in heat_map.yields:
         data[y_axis.index(cms_yield.zeta)][x_axis.index(cms_yield.theta)] = cms_yield.energy_yield
+
 
     fig, ax = plt.subplots()
     ax.set_title(f"Channeling Map {heat_map.title}")
