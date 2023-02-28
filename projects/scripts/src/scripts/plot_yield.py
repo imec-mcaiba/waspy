@@ -15,7 +15,7 @@ def plot_graph(recipe_name, yields, energies):
     fig, ax = plt.subplots(1)
     ax.plot(energies, yields)
     ax.set_title(recipe_name)
-    ax.set_xlabel("Energy [MeV]")
+    ax.set_xlabel("Energy [keV]")
     ax.set_ylabel("Yield [C]")
     return fig
 
