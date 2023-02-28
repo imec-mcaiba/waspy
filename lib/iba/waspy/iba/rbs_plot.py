@@ -52,8 +52,8 @@ def plot_heat_map(heat_map: HeatMap) -> Figure:
     ax.set_title(f"Channeling Map {heat_map.title}")
     ax.set_xlabel("theta")
     ax.set_ylabel("zeta")
-    ax.set_xticks(np.arange(len(x_axis)), labels=x_axis)
-    ax.set_yticks(np.arange(len(y_axis)), labels=y_axis)
+    ax.set_xticks(np.arange(len(x_axis)), labels=x_axis, fontsize=8, rotation=90)
+    ax.set_yticks(np.arange(len(y_axis)), labels=y_axis, fontsize=8)
     im = ax.imshow(data)
     fig.colorbar(im)
 
