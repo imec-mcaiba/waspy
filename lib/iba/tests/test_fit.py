@@ -78,7 +78,7 @@ class TestStringMethods(unittest.TestCase):
 
             fig = plot_energy_yields("test1", fit_result)
 
-            file_handler = FileHandler(Path("./out"), remote_dir=None)
+            file_handler = FileHandler(Path("./tests/out"), remote_dir=None)
             file_handler.write_matplotlib_fig_to_disk(f'{index:02d}_plot_{min_angle}.png', fig)
 
             self.assertAlmostEqual(expected_result, min_angle, 2)
