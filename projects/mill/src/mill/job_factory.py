@@ -1,3 +1,4 @@
+import logging
 from io import StringIO
 from typing import Union, Dict, List
 
@@ -99,6 +100,9 @@ def parse_rbs_recipes(recipes_section, rbs_setup: RbsSetup):
             recipe = parse_channeling_recipe(input_recipe)
             rbs_setup.get_detector(recipe["yield_optimize_detector_identifier"])
             recipes.append(recipe)
+        elif input_recipe["type"] == "rbs_channeling_map":
+            recipe = parse_channeling_map_recipe(input_recipe)
+            recipes.append(recipe)
     return recipes
 
 
@@ -130,6 +134,30 @@ def parse_channeling_recipe(recipe_section: Dict) -> Dict:
     setting.pop("ays_window_start")
     setting["yield_integration_window"]["end"] = setting["ays_window_end"]
     setting.pop("ays_window_end")
+    try:
+        setting["fit_algorithm_type"] = setting["fit_algorithm_type"]
+    except KeyError:
+        setting["fit_algorithm_type"] = "lower_fit"
+
+    return setting
+
+
+def parse_channeling_map_recipe(recipe_section: Dict) -> Dict:
+    setting = drop_nan(recipe_section)
+    convert_coordinates_to_position("start_position", setting)
+    setting["zeta_coordinate_range"] = {"name": "zeta", "start": setting["zeta_start"], "end": setting["zeta_end"],
+                                        "increment": setting["zeta_increment"]}
+    setting["theta_coordinate_range"] = {"name": "theta", "start": setting["theta_start"], "end": setting["theta_end"],
+                                         "increment": setting["theta_increment"]}
+    setting.pop("zeta_start")
+    setting.pop("theta_start")
+    setting.pop("zeta_end")
+    setting.pop("theta_end")
+    setting.pop("zeta_increment")
+    setting.pop("theta_increment")
+    setting["yield_integration_window"] = {"start": setting["yield_window_start"], "end": setting["yield_window_end"]}
+    setting.pop("yield_window_start")
+    setting.pop("yield_window_end")
     return setting
 
 

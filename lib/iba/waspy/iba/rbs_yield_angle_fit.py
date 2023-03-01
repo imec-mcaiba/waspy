@@ -6,6 +6,8 @@ from scipy.interpolate import interp1d, UnivariateSpline
 from scipy import optimize
 from scipy.optimize import Bounds, fmin, fminbound
 
+from waspy.iba.rbs_entities import FitAlgorithmType
+
 
 def get_angle_for_minimum_yield(smooth_angles, smooth_yields) -> float:
     smooth_angle_for_minimum_yield = round(smooth_angles[np.argmin(smooth_yields)], 2)
@@ -15,15 +17,16 @@ def get_angle_for_minimum_yield(smooth_angles, smooth_yields) -> float:
     return smooth_angle_for_minimum_yield
 
 
-def fit_and_smooth(angles, yields, algorithm_type=0):
+def fit_and_smooth(angles, yields, algorithm_type=FitAlgorithmType.LOWER_FIT):
     """Will fit a curve using x and y. When the fit is found, recalculate the y values with a more finely
     distributed x (smooth) (interpolated)."""
 
     # Tried to use scipy minimize, fminbound here - but it does not work as expected in all cases
     # Just eval the entire range and get the minimum - will get very slow with large arrays
-    if algorithm_type == 0:
+    if algorithm_type == FitAlgorithmType.MINIMUM_YIELD:
+        return None, get_angle_for_minimum_yield(angles, yields)
+    elif algorithm_type == FitAlgorithmType.LOWER_FIT:
         return attempt_lower_fit(angles, yields)
-
     else:
         return attempt_fit(angles, yields)
 

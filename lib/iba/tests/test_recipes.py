@@ -1,10 +1,10 @@
 import unittest
 
 from waspy.iba.rbs_entities import RbsChanneling, RecipeType, CoordinateRange, Window, \
-    RbsRandom, RbsData, PositionCoordinates
-from waspy.iba.rbs_recipes import run_channeling, run_random
+    RbsRandom, RbsData, PositionCoordinates, RbsChannelingMap
+from waspy.iba.rbs_recipes import run_channeling, run_random, run_channeling_map
 from waspy.iba.rbs_setup import RbsSetup
-from unittest.mock import Mock, MagicMock, call
+from unittest.mock import MagicMock, call
 import logging
 
 logging.basicConfig(
@@ -16,13 +16,15 @@ logging.basicConfig(
 class TestRecipes(unittest.TestCase):
     def setUp(self):
         self.rbs = MagicMock(spec=RbsSetup)
-        self.rbs.get_status = MagicMock(return_value=RbsData(
+        rbs_data = RbsData(
             aml_x_y={"motor_1_position": 5, "motor_2_position": 10},
             aml_phi_zeta={"motor_1_position": 6, "motor_2_position": 11},
             aml_det_theta={"motor_1_position": 7, "motor_2_position": 12},
             caen={}, motrona={},
             histograms={"d01": [0, 1, 2, 3], "d02": [1, 2, 3, 4]}, measuring_time_sec=0, accumulated_charge=0
-        ))
+        )
+        self.rbs.get_status.return_value = rbs_data
+        self.rbs.cancelled.return_value = False
 
     def test_random(self):
         recipe = RbsRandom(
@@ -48,6 +50,19 @@ class TestRecipes(unittest.TestCase):
         )
         run_channeling(recipe, self.rbs)
 
+    def test_channeling_map(self):
+        recipe = RbsChannelingMap(
+            type=RecipeType.CHANNELING_MAP,
+            sample="sample_001",
+            name="recipe_001",
+            charge_total=2000,
+            zeta_coordinate_range=CoordinateRange(start=-2, end=2, increment=0.2, name="zeta"),
+            theta_coordinate_range=CoordinateRange(start=-2, end=2, increment=0.2, name="theta"),
+            yield_integration_window=Window(start=550, end=650),
+            optimize_detector_identifier="d01",
+        )
+        run_channeling_map(recipe, self.rbs)
+
     def test_run_random(self):
         recipe = RbsRandom(
             type="rbs_random", sample="AE007607_D02_A", name="RBS21_071_01B_A",
@@ -63,3 +78,4 @@ class TestRecipes(unittest.TestCase):
             call_list.append(call.acquire_data(45000 / 16))
 
         self.rbs.assert_has_calls(call_list)
+

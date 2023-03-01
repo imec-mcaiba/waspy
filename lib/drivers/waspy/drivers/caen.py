@@ -68,10 +68,13 @@ class Caen:
         post_request(self._url, request)
 
     def get_raw_histogram(self, board, channel):
-        url = self._url + "/histogram?board=" + str(board) + "&channel=" + str(channel)
+        url = self._url + f"/histogram?board={board}&channel={channel}"
         http_code, data = get_text_with_response_code(url)
         if http_code == 404:
-            raise DriverError(f'Could not retrieve histogram. Does this detector: '
+            url = self._url + f"/histogram/{board}/{channel}"
+            http_code, data = get_text_with_response_code(url)
+            if http_code == 404:
+                raise DriverError(f'Could not retrieve histogram. Does this detector: '
                               f'({board},{channel}) exist?')
         return data
 
@@ -79,13 +82,12 @@ class Caen:
         data = self.get_raw_histogram(meta_data.board, meta_data.channel)
         data = data.split(";")
         data.pop()
-        data = [int(x) for x in data]
+        data = [int(x.replace("\"", "")) for x in data]
         packed_data = _pack(data, meta_data.bins_min, meta_data.bins_max, meta_data.bins_width)
         return packed_data
 
     def get_status(self):
         return get_json(self._url)
-
 
 
 def _pack(data: List[int], index_min, index_max, width) -> List[int]:

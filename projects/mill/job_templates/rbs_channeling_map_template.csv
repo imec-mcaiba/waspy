@@ -1,0 +1,5 @@
+name,job_type,,,,,,,,,,,,,,
+RBS22_084,rbs,,,,,,,,,,,,,,
+,,,,start_position,,,,,,,,,,,
+type,name,sample,charge_total,x,y,phi,zeta_start,zeta_end,zeta_increment,theta_start,theta_end,theta_increment,yield_window_start,yield_window_end,optimize_detector_identifier
+rbs_channeling_map,AE200856_D07,RBS22_084_01A,2000,9,14,,-2,2,0.2,-2,2,0.2,0,100,d01

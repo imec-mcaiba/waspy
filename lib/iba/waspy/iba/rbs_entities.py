@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Optional, Literal, Callable
+from typing import List, Dict, Optional, Literal, Callable, Union
 
 import numpy as np
 from pydantic import BaseModel, Field, validator
@@ -75,6 +75,19 @@ class AysJournal(BaseModel):
     fit: AysFitResult
 
 
+class ChannelingMapYield(BaseModel):
+    zeta: float
+    theta: float
+    energy_yield: int
+
+
+class ChannelingMapJournal(BaseModel):
+    start_time: datetime
+    end_time: datetime
+    rbs_journals: List[RbsJournal]
+    cms_yields: List[ChannelingMapYield]
+
+
 class ChannelingJournal(BaseModel):
     random: RbsJournal
     fixed: RbsJournal
@@ -92,6 +105,11 @@ class PositionCoordinates(BaseModel):
     def __str__(self):
         return "position_{x}_{y}_{phi}_{zeta}_{det}_{theta}".format(x=self.x, y=self.y, phi=self.phi, zeta=self.zeta,
                                                                     det=self.detector, theta=self.theta)
+
+
+class HeatMap(BaseModel):
+    title: str
+    yields: List[ChannelingMapYield]
 
 
 class Graph(BaseModel):
@@ -117,8 +135,8 @@ class RbsHistogramGraphData(BaseModel):
 class RbsHistogramGraphDataSet(BaseModel):
     """
         The amount of items in the super-list of histograms determines how many graphs will be created. The data in the"
-        sub-list of histograms will be plot on the same graph. There can be more than 1 plot per graph")
-        ]Example:
+        sub-list of histograms will be plotted on the same graph. There can be more than 1 plot per graph")
+        Example:
             histograms = [ [[0,1,2], [1,2,3]], [[2,3,4], [3,4,5]], [[4,5,6], [5,6,7]] ]
                            ---- graph 1 ----   ---- graph 2 -----  ---- graph 3 -----
                            -plot 1-  -plot 2-  -plot 1-  -plot 2-  - plot 1-  -plot 2-
@@ -131,6 +149,7 @@ class RbsHistogramGraphDataSet(BaseModel):
 
 
 class RecipeType(str, Enum):
+    CHANNELING_MAP = "rbs_channeling_map"
     CHANNELING = "rbs_channeling"
     RANDOM = "rbs_random"
     ANGULAR_YIELD = "rbs_angular_yield"
@@ -142,6 +161,12 @@ class CoordinateEnum(str, Enum):
     theta = "theta"
     phi = "phi"
     none = "none"
+
+
+class FitAlgorithmType(str, Enum):
+    MINIMUM_YIELD = "minimum_yield"
+    LOWER_FIT = "lower_fit"
+    STD_FIT = "std_fit"
 
 
 class CoordinateRange(BaseModel):
@@ -213,6 +238,7 @@ class RbsChanneling(BaseModel):
     yield_optimize_detector_identifier: str
     compare_charge_total: int
     random_coordinate_range: CoordinateRange
+    fit_algorithm_type: FitAlgorithmType
 
     class Config:
         extra = 'forbid'
@@ -240,6 +266,19 @@ class RbsRandom(BaseModel):
     start_position: Optional[PositionCoordinates]
     charge_total: int
     coordinate_range: CoordinateRange
+
+
+class RbsChannelingMap(BaseModel):
+    """ The model for a channeling map measurement - the 2 vary_coordinates are changed depending on each other """
+    type: Literal[RecipeType.CHANNELING_MAP]
+    sample: str
+    name: str
+    start_position: Optional[PositionCoordinates]
+    charge_total: int
+    zeta_coordinate_range: CoordinateRange
+    theta_coordinate_range: CoordinateRange
+    yield_integration_window: Window
+    optimize_detector_identifier: str
 
 
 class RbsSingleStep(BaseModel):

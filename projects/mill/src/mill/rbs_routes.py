@@ -24,7 +24,7 @@ def build_driver_endpoints(http_server, rbs_hardware):
             build_detector_endpoints(http_server, daemon['proxy'], daemon['url'], caen_daemon.detectors, ["RBS"])
 
 
-def build_setup_endpoints(http_server, rbs_setup:RbsSetup):
+def build_setup_endpoints(http_server, rbs_setup: RbsSetup):
     @http_server.get("/api/rbs/status", tags=["RBS"], summary="Retrieves the rbs status")
     def get_rbs_status():
         return rbs_setup.get_status()

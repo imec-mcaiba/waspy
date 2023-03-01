@@ -1,6 +1,3 @@
- **
- ***
  **** META ****
- some meta info
- fwhm = {{dacq.dacq_fwhm}}
- ***** META END ***
+ * ENERGY[MeV] := {{2-RBS-dacq.Energy[MeV]}} MeV
+ **** META END ****

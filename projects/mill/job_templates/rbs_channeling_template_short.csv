@@ -1,0 +1,5 @@
+name,job_type,,,,,,,,,,,,,
+RBS22_084,rbs,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+type,name,sample,charge_total,x,y,phi,zeta,det,theta,ays_charge,ays_window_start,ays_window_end,ays_detector_identifier,fit_algorithm_type
+rbs_channeling,AE200856_D07,RBS22_084_01A,60000,9,14,,0.15,170,11,10000,700,750,d01,lower_fit

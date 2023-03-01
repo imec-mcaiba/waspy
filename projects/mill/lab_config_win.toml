@@ -1,0 +1,83 @@
+[any.drivers.motrona_sf6]
+type="motrona_ax350"
+title="Motrona SF6"
+url="http://127.0.0.1:22101/api/latest"
+
+[any.drivers.motrona_theta_encoder]
+type="motrona_dx350"
+title="Motrona Theta Encoder"
+url="http://127.0.0.1:22105/api/latest"
+
+[any.drivers.motrona_terminal_voltage]
+type="motrona_ax350"
+title="Motrona Terminal Voltage"
+url="http://127.0.0.1:22102/api/latest"
+
+[any.drivers.motrona_motor_current]
+type="motrona_ax350"
+title="Motrona Motor Current"
+url="http://127.0.0.1:22103/api/latest"
+
+[rbs.drivers.aml_x_y]
+type="aml"
+title="AML X Y"
+url="https://mill.capitan.imec.be/api/rbs/aml_x_y"
+names = ["X", "Y"]
+
+[rbs.drivers.aml_phi_zeta]
+type = "aml"
+title = "AML Phi Zeta"
+url = "https://mill.capitan.imec.be/api/rbs/aml_phi_zeta"
+names = ["Phi", "Zeta"]
+
+[rbs.drivers.aml_det_theta]
+type = "aml"
+title = "AML Detector Theta"
+url = "https://mill.capitan.imec.be/api/rbs/aml_det_theta"
+names = ["Detector", "Theta"]
+
+[rbs.drivers.motrona_charge]
+type = "motrona_dx350"
+title = "Motrona Charge"
+url = "https://mill.capitan.imec.be/api/rbs/motrona_charge"
+
+[rbs.drivers.caen]
+type = "caen"
+title = "Caen"
+url = "https://mill.capitan.imec.be/api/rbs/caen"
+detectors = [
+	{"board"="10664", "channel"=0, "identifier"="d01", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+	{"board"="10664", "channel"=1, "identifier"="d02", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=0, "identifier"="MD01", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=1, "identifier"="MD02", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=2, "identifier"="MD03", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=3, "identifier"="MD04", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=4, "identifier"="MD05", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=5, "identifier"="MD06", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=6, "identifier"="MD07", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+    {"board"="33", "channel"=7, "identifier"="MD08", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+]
+
+[erd.drivers.mdrive_z]
+type = "mdrive"
+title = "MDrive Z"
+url = "http://127.0.0.1:22124/api/latest"
+
+[erd.drivers.mdrive_theta]
+type = "mdrive"
+title = "MDrive Theta"
+url = "http://127.0.0.1:22123/api/latest"
+
+[erd.drivers.mpa3]
+type = "mpa3"
+title = "MPA 3"
+url = "http://172.16.0.11:25000/api/latest"
+
+[rbs]
+local_dir = "/mnt/mcaiba_nas/transfer_RBS"
+remote_dir = "/mnt/winbe_wasp/transfer_RBS"
+
+[erd]
+local_dir = "/mnt/mcaiba_nas/transfer_ERD"
+remote_dir = "/mnt/winbe_wasp/transfer_ERD"
+
