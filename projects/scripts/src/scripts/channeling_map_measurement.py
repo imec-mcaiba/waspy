@@ -98,17 +98,38 @@ if __name__ == "__main__":
      - start_position
      - all coordinates in PositionCoordinates
     """
-    recipe = RbsChannelingMap(
+    recipes = [RbsChannelingMap(
         type=RecipeType.CHANNELING_MAP,
         sample="sample2",
-        name="RBS23_00X",
+        name="RBS23_001_A",
+        start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
+        charge_total=400,
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
+        yield_integration_window=Window(start=700, end=730),
+        optimize_detector_identifier="d01"
+    ), RbsChannelingMap(
+        type=RecipeType.CHANNELING_MAP,
+        sample="sample2",
+        name="RBS23_001_B",
+        start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
+        charge_total=400,
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
+        yield_integration_window=Window(start=600, end=630),
+        optimize_detector_identifier="d01"
+    ), RbsChannelingMap(
+        type=RecipeType.CHANNELING_MAP,
+        sample="sample2",
+        name="RBS23_001_C",
         start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
         charge_total=400,
         zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
         theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
         yield_integration_window=Window(start=400, end=430),
         optimize_detector_identifier="d01"
-    )
+    )]
+
     """
     ===================================================================================
     ===================================================================================
@@ -117,15 +138,19 @@ if __name__ == "__main__":
     rbs_setup = RbsSetup(mill_config.rbs.get_driver_urls())
     rbs_setup.configure_detectors(mill_config.rbs.drivers.caen.detectors)
     file_handler = FileHandler(local_dir, remote_dir)
-    file_handler.set_base_folder(recipe.name)
+
     recipe_meta_data = RecipeMeta(logbook_db, recipe_meta_dir)
-    logging.info(
-        f"{log_label} Files are saved in {os.path.join(local_dir, recipe.name)} and {os.path.join(remote_dir, recipe.name)}")
-
     recipe_meta_data = recipe_meta_data.fill_rbs_recipe_meta()
-    journal = run_channeling_map()
-    title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
-            f"{recipe.optimize_detector_identifier}"
-    save_channeling_map_to_disk(file_handler, recipe.name, journal.cms_yields, title)
 
-    logging.info(f"{log_label} All measurements completed!")
+    for recipe in recipes:
+        logging.info(f"{log_label} =========== Running {recipe.name} ===========")
+        file_handler.set_base_folder(recipe.name)
+        logging.info(
+            f"{log_label} Files are saved in {os.path.join(local_dir, recipe.name)} and {os.path.join(remote_dir, recipe.name)}")
+
+        journal = run_channeling_map()
+        title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
+                f"{recipe.optimize_detector_identifier}"
+        save_channeling_map_to_disk(file_handler, recipe.name, journal.cms_yields, title)
+
+        logging.info(f"{log_label} All measurements completed!")
