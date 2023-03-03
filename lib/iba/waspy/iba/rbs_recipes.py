@@ -1,5 +1,8 @@
 import logging
+import os.path
 from datetime import datetime
+from pathlib import Path
+from shutil import copytree
 from typing import List
 
 from scipy.optimize import OptimizeWarning
@@ -23,7 +26,8 @@ def run_random(recipe: RbsRandom, rbs: RbsSetup) -> RbsJournal:
     return get_rbs_journal(rbs_data, start_time)
 
 
-def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup, file_handler: FileHandler, recipe_meta_data) -> ChannelingMapJournal:
+def run_channeling_map(recipe: RbsChannelingMap, rbs: RbsSetup, file_handler: FileHandler,
+                       recipe_meta_data) -> ChannelingMapJournal:
     start_time = datetime.now()
     rbs.move(recipe.start_position)
 
@@ -95,12 +99,14 @@ def run_rbs_recipe(coordinate_range: CoordinateRange, charge_total: int, rbs: Rb
     return rbs.get_status(True)
 
 
-def save_channeling_map_to_disk(file_writer, recipe_name: str, yields: List[ChannelingMapYield], title):
-    # file_writer.cd_folder(recipe_name)
+def save_channeling_map_to_disk(file_writer, yields: List[ChannelingMapYield], title):
     heat_map = HeatMap(title=title, yields=yields)
     fig = plot_heat_map(heat_map)
     file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)
-    # file_writer.cd_folder_up()
+
+
+def copy_analysis_to_disk(file_writer):
+    file_writer.copy_folder_to_base("../analysis/src/analysis", Path("analysis"))
 
 
 def save_channeling_graphs_to_disk(file_writer, channeling_result: ChannelingJournal, file_stem):
@@ -186,7 +192,8 @@ def serialize_energy_yields(fit_data: AysFitResult) -> str:
     return text
 
 
-def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(AysJournal), file_handler, recipe_meta_data) -> List[AysJournal]:
+def run_ays(recipe: RbsChanneling, rbs: RbsSetup, ays_report_callback: callable(AysJournal), file_handler,
+            recipe_meta_data) -> List[AysJournal]:
     """ays: angular yield scan"""
     start_time = datetime.now()
     result = []

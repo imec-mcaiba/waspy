@@ -11,7 +11,7 @@ from mill.job import Job
 
 from waspy.iba.file_handler import FileHandler
 from waspy.iba.rbs_recipes import run_random, run_channeling, save_rbs_journal, \
-    run_channeling_map, save_channeling_map_to_disk, save_channeling_graphs_to_disk
+    run_channeling_map, save_channeling_map_to_disk, save_channeling_graphs_to_disk, copy_analysis_to_disk
 from waspy.iba.rbs_setup import RbsSetup
 
 empty_recipe = RbsRandom(type="rbs_random", sample="", name="", charge_total=0,
@@ -99,7 +99,8 @@ class RbsJob(Job):
         journal = run_channeling_map(recipe, self._rbs_setup, self._file_writer, recipe_meta_data)
         title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
                 f"{recipe.optimize_detector_identifier}"
-        save_channeling_map_to_disk(self._file_writer, recipe.name, journal.cms_yields, title)
+        save_channeling_map_to_disk(self._file_writer, journal.cms_yields, title)
+        # copy_analysis_to_disk(self._file_writer)
         # TODO: log finish in db
 
     def _run_channeling_recipe(self, recipe: RbsChanneling):
@@ -144,8 +145,14 @@ def _get_total_counts_channeling(recipe: RbsChanneling):
 
 
 def _get_total_counts_channeling_map(recipe: RbsChannelingMap):
-    zeta_locations = (recipe.zeta_coordinate_range.end-recipe.zeta_coordinate_range.start)/recipe.zeta_coordinate_range.increment
-    theta_locations = (recipe.theta_coordinate_range.end-recipe.theta_coordinate_range.start)/recipe.theta_coordinate_range.increment
+    if recipe.zeta_coordinate_range.start == recipe.zeta_coordinate_range.end or recipe.zeta_coordinate_range.increment == 0:
+        zeta_locations = 1
+    else:
+        zeta_locations = (recipe.zeta_coordinate_range.end-recipe.zeta_coordinate_range.start)/recipe.zeta_coordinate_range.increment
+    if recipe.theta_coordinate_range.start == recipe.theta_coordinate_range.end or recipe.theta_coordinate_range.increment == 0:
+        theta_locations = 1
+    else:
+        theta_locations = (recipe.theta_coordinate_range.end-recipe.theta_coordinate_range.start)/recipe.theta_coordinate_range.increment
     return recipe.charge_total * zeta_locations * theta_locations
 
 
