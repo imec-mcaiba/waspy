@@ -290,7 +290,7 @@ class RbsSingleStep(BaseModel):
 
 
 def get_positions_as_float(coordinate_range: CoordinateRange) -> List[float]:
-    if coordinate_range.increment == 0:
+    if coordinate_range.increment == 0 or coordinate_range.start == coordinate_range.end:
         return [coordinate_range.start]
     coordinate_range = np.arange(coordinate_range.start, coordinate_range.end + coordinate_range.increment,
                                  coordinate_range.increment)
