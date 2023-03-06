@@ -105,8 +105,8 @@ if __name__ == "__main__":
         name="RBS23_001_B",
         start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
         charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=1.0),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=1.0),
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=-2, increment=1.0),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=-2, increment=1.0),
         yield_integration_window=Window(start=0, end=200),
         optimize_detector_identifier="d01"
     )]
@@ -136,4 +136,4 @@ if __name__ == "__main__":
 
         logging.info(f"{log_label} All measurements completed!")
 
-    copy_analysis_to_disk(file_handler)
+    copy_analysis_to_disk(file_handler, "../../../analysis/src/analysis")

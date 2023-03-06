@@ -46,7 +46,6 @@ def plot_yield():
             print(f"Saving {title}")
             file_handler.write_matplotlib_fig_to_disk(f'{title}.png', figure)
 
-
     assert recipe_name is not unknown_recipe_str, f"No recipe name found in {data_files_dir}."
 
 

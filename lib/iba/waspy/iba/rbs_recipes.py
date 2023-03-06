@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 from typing import List
 from zipfile import Path
@@ -102,8 +103,8 @@ def save_channeling_map_to_disk(file_writer, yields: List[ChannelingMapYield], t
     file_writer.write_matplotlib_fig_to_disk(f'channeling_map_{heat_map.title}.png', fig)
 
 
-def copy_analysis_to_disk(file_writer):
-    file_writer.copy_folder_to_base("../analysis/src/analysis", Path("analysis"))
+def copy_analysis_to_disk(file_writer, source):
+    file_writer.copy_folder_to_base(source, "analysis")
 
 
 def save_channeling_graphs_to_disk(file_writer, channeling_result: ChannelingJournal, file_stem):

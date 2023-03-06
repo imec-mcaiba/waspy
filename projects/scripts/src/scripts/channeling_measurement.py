@@ -12,10 +12,9 @@ from waspy.iba.rbs_entities import CoordinateRange, Window, PositionCoordinates,
     ChannelingJournal, AysJournal, AysFitResult
 from waspy.iba.rbs_recipes import get_sum, \
     save_channeling_graphs_to_disk, save_rbs_journal_with_file_stem, run_rbs_recipe, find_minimum, \
-    convert_float_to_coordinate, save_ays_journal
+    convert_float_to_coordinate, save_ays_journal, copy_analysis_to_disk
 from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
-
 
 log_label = "[WASPY.SCRIPTS.CHANNELING_MEASUREMENT]"
 
@@ -145,7 +144,7 @@ if __name__ == "__main__":
         yield_integration_window=Window(start=700, end=750),
         yield_optimize_detector_identifier="d01",
         compare_charge_total=10000,
-        random_coordinate_range=CoordinateRange(name="phi", start=-2, end=2, increment=0.2),
+        random_coordinate_range=CoordinateRange(name="phi", start=-2, end=2, increment=2),
         fit_algorithm_type="minimum_yield"
     )
     """
@@ -164,3 +163,5 @@ if __name__ == "__main__":
     recipe_meta_data = recipe_meta_data.fill_rbs_recipe_meta()
     journal = run_channeling()
     save_channeling_graphs_to_disk(file_handler, journal, recipe.name)
+
+    copy_analysis_to_disk(file_handler, "../../../analysis/src/analysis")
