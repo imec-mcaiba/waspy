@@ -9,7 +9,8 @@ from waspy.iba.file_handler import FileHandler
 from waspy.iba.iba_error import CancelError
 from waspy.iba.rbs_entities import RbsChannelingMap, CoordinateRange, Window, PositionCoordinates, ChannelingMapJournal, \
     get_positions_as_float, get_rbs_journal, ChannelingMapYield, RecipeType
-from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal
+from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal, \
+    copy_analysis_to_disk
 from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
 
@@ -101,32 +102,12 @@ if __name__ == "__main__":
     recipes = [RbsChannelingMap(
         type=RecipeType.CHANNELING_MAP,
         sample="sample2",
-        name="RBS23_001_A",
-        start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
-        charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
-        yield_integration_window=Window(start=700, end=730),
-        optimize_detector_identifier="d01"
-    ), RbsChannelingMap(
-        type=RecipeType.CHANNELING_MAP,
-        sample="sample2",
         name="RBS23_001_B",
         start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
         charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
-        yield_integration_window=Window(start=600, end=630),
-        optimize_detector_identifier="d01"
-    ), RbsChannelingMap(
-        type=RecipeType.CHANNELING_MAP,
-        sample="sample2",
-        name="RBS23_001_C",
-        start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
-        charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
-        yield_integration_window=Window(start=400, end=430),
+        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=1.0),
+        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=1.0),
+        yield_integration_window=Window(start=0, end=200),
         optimize_detector_identifier="d01"
     )]
 
@@ -151,6 +132,8 @@ if __name__ == "__main__":
         journal = run_channeling_map()
         title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
                 f"{recipe.optimize_detector_identifier}"
-        save_channeling_map_to_disk(file_handler, recipe.name, journal.cms_yields, title)
+        save_channeling_map_to_disk(file_handler, journal.cms_yields, title)
 
         logging.info(f"{log_label} All measurements completed!")
+
+    copy_analysis_to_disk(file_handler)

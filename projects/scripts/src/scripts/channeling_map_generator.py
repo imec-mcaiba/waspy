@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 from waspy.iba.rbs_entities import Window, ChannelingMapYield
-from waspy.iba.rbs_recipes import get_sum, save_channeling_map_to_disk
+from waspy.iba.rbs_recipes import get_sum, save_channeling_map_to_disk, copy_analysis_to_disk
 from waspy.iba.file_handler import FileHandler
 
 
@@ -18,8 +18,11 @@ def create_channeling_map():
     assert glob.glob(file_search_str), f"Files do not exist, {file_search_str}. Check if detector name is correct."
 
     for file in glob.glob(file_search_str):
-        files_dir = data_files_dir.replace("\\", "\\\\")
-        reg_exp_file = f"{files_dir}\/?\\\\\d*_(\S*)_zeta(\S*)_theta(\S*)_{optimize_detector_identifier}\.txt"
+        if sys.platform == "linux" or sys.platform == "linux2":
+            reg_exp_file = f"{data_files_dir}\/?\d*_(\S*)_zeta(\S*)_theta(\S*)_{optimize_detector_identifier}\.txt"
+        elif sys.platform == "win32":
+            files_dir = data_files_dir.replace("\\", "\\\\")
+            reg_exp_file = f"{files_dir}\/?\\\\\d*_(\S*)_zeta(\S*)_theta(\S*)_{optimize_detector_identifier}\.txt"
         found = re.search(reg_exp_file, file)
 
         if found:
@@ -42,7 +45,7 @@ def create_channeling_map():
     file_handler = FileHandler(Path(data_files_dir))
     title = f"{recipe_name}_{energy_window.start}_{energy_window.end}_" \
             f"{optimize_detector_identifier}"
-    save_channeling_map_to_disk(file_handler, "", cms_yields, title)
+    save_channeling_map_to_disk(file_handler, cms_yields, title)
 
 
 if __name__ == "__main__":
