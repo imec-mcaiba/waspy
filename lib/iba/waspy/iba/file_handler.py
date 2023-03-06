@@ -1,7 +1,7 @@
 import traceback
 from datetime import datetime
 from pathlib import Path
-from shutil import move, copy2
+from shutil import move, copy2, copytree
 from typing import Dict, Union
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
@@ -111,6 +111,11 @@ class FileHandler:
             Path.mkdir(full_subdir, exist_ok=True)
             for file in files_to_move:
                 move(file, full_subdir)
+
+    def copy_folder_to_base(self, source, sub_folder):
+        destination = self._local / self._base_folder / sub_folder
+        logging.info(f"[WASPY.IBA.FILE_WRITER] copying {source} to {destination}")
+        copytree(source, destination)
 
 
 def _try_copy(source, destination):
