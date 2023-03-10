@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 
 def get_caen_detectors():
+    """
+    Retrieves all Caen detectors
+    """
     config = requests.get(f"http://localhost:8000/api/config").json()
     # print(config['rbs']['drivers']['caen']['detectors'])
     return config['rbs']['drivers']['caen']['detectors']
@@ -36,13 +39,13 @@ class Window(QDialog):
         self.bin_nb = 1024
         self.binning_min_textbox = QLineEdit(str(self.bin_min))
         self.binning_min_textbox.setValidator(QIntValidator())
-        self.binning_min_textbox.textChanged.connect(self.on_binning_min_change)
+        self.binning_min_textbox.textChanged.connect(self._on_change_binning_min)
         self.binning_max_textbox = QLineEdit(str(self.bin_max))
         self.binning_max_textbox.setValidator(QIntValidator())
-        self.binning_max_textbox.textChanged.connect(self.on_binning_max_change)
+        self.binning_max_textbox.textChanged.connect(self._on_change_binning_max)
         self.binning_nb_of_bins_textbox = QLineEdit(str(self.bin_nb))
         self.binning_nb_of_bins_textbox.setValidator(QIntValidator())
-        self.binning_nb_of_bins_textbox.textChanged.connect(self.on_binning_nb_of_bins_change)
+        self.binning_nb_of_bins_textbox.textChanged.connect(self._on_change_binning_nb_of_bins)
         self.apply_binning_btn = QPushButton("Apply")
         self.apply_binning_btn.clicked.connect(self.apply_options)
         self.apply_enabled = {'min': True, 'max': True, 'nb': True}
@@ -93,7 +96,7 @@ class Window(QDialog):
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.ani = animation.FuncAnimation(self.fig, self.consume_data,
                                            frames=self.get_data(),
-                                           interval=500,
+                                           interval=1000,
                                            repeat=True,
                                            cache_frame_data=False,
                                            blit=False)
@@ -111,6 +114,9 @@ class Window(QDialog):
         self.setLayout(layout)
 
     def set_play_pause(self):
+        """
+        Handles pausing/resuming the FuncAnimation plot together with user feedback messages.
+        """
         self.pause = not self.pause
         if self.pause:
             self.ani.pause()
@@ -121,7 +127,10 @@ class Window(QDialog):
             self.pause_btn.setText("Pause")
             self.pause_status.setText("Acquiring data...")
 
-    def on_binning_min_change(self):
+    def _on_change_binning_min(self):
+        """
+        Validation of user input value for binning minimum value
+        """
         try:
             min = int(self.binning_min_textbox.text())
             max = int(self.binning_max_textbox.text())
@@ -145,7 +154,10 @@ class Window(QDialog):
             self.apply_enabled['min'] = False
         self.refresh_apply_enabled()
 
-    def on_binning_max_change(self):
+    def _on_change_binning_max(self):
+        """
+        Validation of user input value for binning maximum value
+        """
         try:
             min = int(self.binning_min_textbox.text())
             max = int(self.binning_max_textbox.text())
@@ -169,7 +181,10 @@ class Window(QDialog):
             self.apply_enabled['max'] = False
         self.refresh_apply_enabled()
 
-    def on_binning_nb_of_bins_change(self):
+    def _on_change_binning_nb_of_bins(self):
+        """
+        Validation of user input value for number of bins
+        """
         try:
             min = int(self.binning_min_textbox.text())
             max = int(self.binning_max_textbox.text())
@@ -187,16 +202,25 @@ class Window(QDialog):
         self.refresh_apply_enabled()
 
     def refresh_apply_enabled(self):
+        """
+        Decides whether the apply button should be enabled or disabled
+        """
         min, max, nb = self.apply_enabled.values()
         # print(f"min {min} max {max} nb {nb}")
         self.apply_binning_btn.setEnabled(min and max and nb)
 
     def apply_options(self):
+        """
+        Sets the user input as binning values
+        """
         self.bin_min = int(self.binning_min_textbox.text())
         self.bin_max = int(self.binning_max_textbox.text())
         self.bin_nb = int(self.binning_nb_of_bins_textbox.text())
 
     def clear(self):
+        """
+        Clears plot area but needs to take into account the zoom region and autoscale mode
+        """
         x_lim = self.axes.get_xlim()
         y_lim = self.axes.get_ylim()
 
@@ -211,6 +235,9 @@ class Window(QDialog):
         self.axes.set_title(f"Detector {self.detector_box.currentText()}")
 
     def reset_axes(self):
+        """
+        Resets the x and y-axis
+        """
         self.axes.set_xlabel("Energy Level")
         self.axes.set_ylabel("Occurrence")
         self.axes.grid(which='both')
@@ -218,6 +245,13 @@ class Window(QDialog):
         self.axes.xaxis.set_ticks_position('bottom')
 
     def consume_data(self, data):
+        """
+        Parameters
+        ----------
+        data
+
+        Manages refreshing the plot with new data
+        """
         if data is None:
             print("No data available !!")
             self.axes.set_facecolor('lightgrey')
@@ -229,6 +263,9 @@ class Window(QDialog):
         self.axes.plot(data)
 
     def get_data(self):
+        """
+        Retrieves data from the Waspy API (Mill)
+        """
         while True:
             try:
                 # data = requests.get(f"http://localhost:8000/api/rbs/caen/detector/{self.detector_box.currentText()}").json()
@@ -242,6 +279,9 @@ class Window(QDialog):
             yield data
 
     def check_pile_up(self):
+        """
+        Retrieves whether the pile-up warning of Caen is triggered
+        """
         if True:
             self.pile_up_text.setText("Pile-up detected! [not functional]")
             self.icon_lbl.show()

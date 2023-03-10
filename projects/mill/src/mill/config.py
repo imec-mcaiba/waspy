@@ -5,6 +5,7 @@ from pydantic import BaseSettings, BaseModel
 from mill.erd_entities import ErdConfig
 from mill.entities import AnyDriverConfig
 from mill.rbs_entities import RbsConfig
+from mill.pellicle_entities import PellicleConfig
 import logging
 import tomli
 
@@ -18,6 +19,7 @@ class MillConfig(BaseModel):
     any: Optional[AnyDriverConfig]
     rbs: Optional[RbsConfig]
     erd: Optional[ErdConfig]
+    pellicle: Optional[PellicleConfig]
 
 
 class GlobalConfig(BaseSettings):

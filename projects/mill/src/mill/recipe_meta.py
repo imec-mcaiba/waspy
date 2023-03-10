@@ -14,6 +14,7 @@ class RecipeMeta:
         self._db = db
         self._RBS_FILENAME = 'rbs_recipe_meta_template.txt'
         self._ERD_FILENAME = 'erd_recipe_meta_template.txt'
+        self._PELLICLE_FILENAME = 'pellicle_recipe_meta_template.txt'
 
     def write_rbs_recipe_meta_template(self, content):
         return self._file_handler.write_text_to_disk(self._RBS_FILENAME, content)
@@ -43,6 +44,21 @@ class RecipeMeta:
             return fill_in_meta_template(content, daybook)
         except:
             logging.error("Failed to fill in erd recipe template metadata" + str(e))
+            return ""
+
+    def write_pellicle_recipe_meta_template(self, content):
+        return self._file_handler.write_text_to_disk(self._PELLICLE_FILENAME, content)
+
+    def get_pellicle_recipe_meta_template_path(self):
+        return self._file_handler.get_local_dir() / self._PELLICLE_FILENAME
+
+    def fill_pellicle_recipe_meta(self):
+        try:
+            content = self._file_handler.read_text_from_disk(self._PELLICLE_FILENAME)
+            daybook = self._db.get_daybook()
+            return fill_in_meta_template(content, daybook)
+        except Exception as e:
+            logging.error("Failed to fill in pellicle recipe template metadata" + str(e))
             return ""
 
 
