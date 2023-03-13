@@ -1,0 +1,6 @@
+ **
+ ***
+ **** META ****
+ some meta info
+ fwhm = {{dacq.dacq_fwhm}}
+ ***** META END ***

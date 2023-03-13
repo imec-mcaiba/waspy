@@ -1,5 +1,5 @@
 #!/bin/bash
-export config_file="./default_config_vdg.toml"
+export config_file="./vdg_default_config.toml"
 export faker=false
 export env_state="dev"
 export trend_store="/tmp/trends/"

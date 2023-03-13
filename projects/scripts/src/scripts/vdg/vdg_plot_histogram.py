@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import requests
@@ -23,6 +23,8 @@ class Window(QDialog):
 
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
+
+        # self.setMaximumHeight(660)
 
         # Detector Option
         self.detector_box = QComboBox()
@@ -50,7 +52,7 @@ class Window(QDialog):
         self.apply_binning_btn.clicked.connect(self.apply_options)
         self.apply_enabled = {'min': True, 'max': True, 'nb': True}
         binning_lyt = QHBoxLayout()
-        binning_lyt.addWidget(QLabel("Binning"))
+        binning_lyt.addWidget(QLabel("Binning:"))
         binning_lyt.addWidget(QLabel("Min"))
         binning_lyt.addWidget(self.binning_min_textbox)
         binning_lyt.addWidget(QLabel("Max"))
@@ -63,24 +65,43 @@ class Window(QDialog):
         # Pause Button
         self.pause_btn = QPushButton("Pause")
         self.pause_btn.clicked.connect(self.set_play_pause)
+        self.pause_btn.setMaximumWidth(100)
 
         # Acquisition Status
         self.pause_status = QLabel("Acquiring data...")
 
         # Pile-Up Status Message
-        pile_up_lyt = QHBoxLayout()
         self.pile_up_text = QLabel("No pile-up [not functional]")
         self.icon_lbl = QLabel()
         icon = app.style().standardIcon(QStyle.SP_MessageBoxWarning)
         self.icon_lbl.setPixmap(icon.pixmap(24))
         self.icon_lbl.hide()
+        pile_up_lyt = QHBoxLayout()
         pile_up_lyt.addWidget(self.icon_lbl)
         pile_up_lyt.addWidget(self.pile_up_text)
         pile_up_lyt.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         status_lyt = QHBoxLayout()
         status_lyt.addWidget(self.pause_status)
-        status_lyt.addLayout(pile_up_lyt)
+        # status_lyt.addLayout(pile_up_lyt) ;#TODO
+
+        # Integration Window
+        self.integrate_min = 0
+        self.integrate_max = 100
+        self.integrate_btn = QPushButton("Apply")
+        self.integrate_btn.clicked.connect(self.apply_integration)
+        self.integrate_min_text = QLineEdit(str(self.integrate_min))
+        self.integrate_max_text = QLineEdit(str(self.integrate_max))
+        self.integrate_value = QLabel("0")
+        integrate_lyt = QHBoxLayout()
+        integrate_lyt.addWidget(QLabel("Integrate window: "))
+        integrate_lyt.addWidget(QLabel("Emin"))
+        integrate_lyt.addWidget(self.integrate_min_text)
+        integrate_lyt.addWidget(QLabel("Emax"))
+        integrate_lyt.addWidget(self.integrate_max_text)
+        integrate_lyt.addWidget(self.integrate_btn)
+        integrate_lyt.addWidget(QLabel("| Value"))
+        integrate_lyt.addWidget(self.integrate_value)
 
         # Variables
         self.pause = False
@@ -101,16 +122,17 @@ class Window(QDialog):
                                            cache_frame_data=False,
                                            blit=False)
         self.canvas.draw()
+        self.toolbar.actions()[0].triggered.connect(self.on_click_home)
 
         # Window Layout
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addLayout(detector_lyt)
         layout.addLayout(binning_lyt)
+        layout.addLayout(integrate_lyt)
         layout.addWidget(self.pause_btn)
-        layout.addLayout(status_lyt)
         layout.addWidget(self.canvas)
-        layout.addStretch()
+        layout.addLayout(status_lyt)
         self.setLayout(layout)
 
     def set_play_pause(self):
@@ -149,9 +171,10 @@ class Window(QDialog):
                 self.binning_nb_of_bins_textbox.setStyleSheet("")
                 self.apply_enabled['nb'] = True
 
-        except Exception:
+        except ValueError:
             print("Invalid values")
             self.apply_enabled['min'] = False
+
         self.refresh_apply_enabled()
 
     def _on_change_binning_max(self):
@@ -176,9 +199,10 @@ class Window(QDialog):
                 self.binning_nb_of_bins_textbox.setStyleSheet("")
                 self.apply_enabled['nb'] = True
 
-        except Exception:
+        except ValueError:
             print("Invalid values")
             self.apply_enabled['max'] = False
+
         self.refresh_apply_enabled()
 
     def _on_change_binning_nb_of_bins(self):
@@ -196,9 +220,11 @@ class Window(QDialog):
             else:
                 self.binning_nb_of_bins_textbox.setStyleSheet("")
                 self.apply_enabled['nb'] = True
-        except Exception:
+
+        except ValueError:
             print("Invalid values")
             self.apply_enabled['nb'] = False
+
         self.refresh_apply_enabled()
 
     def refresh_apply_enabled(self):
@@ -217,6 +243,14 @@ class Window(QDialog):
         self.bin_max = int(self.binning_max_textbox.text())
         self.bin_nb = int(self.binning_nb_of_bins_textbox.text())
 
+    def apply_integration(self):
+        self.integrate_min_text = self.integrate_min
+        self.integrate_max_text = self.integrate_max
+
+    def on_click_home(self):
+        self.axes.set_autoscale_on(True)
+        self.autoscale = True
+
     def clear(self):
         """
         Clears plot area but needs to take into account the zoom region and autoscale mode
@@ -232,7 +266,6 @@ class Window(QDialog):
         if not self.autoscale:
             self.axes.set_xlim(x_lim)
             self.axes.set_ylim(y_lim)
-        self.axes.set_title(f"Detector {self.detector_box.currentText()}")
 
     def reset_axes(self):
         """
@@ -243,6 +276,9 @@ class Window(QDialog):
         self.axes.grid(which='both')
         self.axes.yaxis.set_ticks_position('left')
         self.axes.xaxis.set_ticks_position('bottom')
+
+    def calculate_integration_window(self, data):
+        self.integrate_value = sum([data[i] for i in range(self.integrate_min, self.integrate_max)])
 
     def consume_data(self, data):
         """
@@ -260,7 +296,9 @@ class Window(QDialog):
             self.axes.set_facecolor('white')
         self.clear()
         self.reset_axes()
+        self.axes.set_title(f"Detector {self.detector_box.currentText()}")
         self.axes.plot(data)
+        self.calculate_integration_window(data)
 
     def get_data(self):
         """
@@ -284,7 +322,7 @@ class Window(QDialog):
         """
         if True:
             self.pile_up_text.setText("Pile-up detected! [not functional]")
-            self.icon_lbl.show()
+            # self.icon_lbl.show() ;#TODO
         else:
             self.pile_up_text.setText("No pile-up [not functional]")
             self.icon_lbl.hide()

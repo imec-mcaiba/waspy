@@ -4,6 +4,7 @@ import random
 import numpy as np
 
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QHBoxLayout, QComboBox, QGridLayout, QLabel
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasAgg, NavigationToolbar2QT as NavigationToolbar)
@@ -11,8 +12,7 @@ from matplotlib.figure import Figure
 
 import matplotlib.pyplot as plt
 
-from waspy.hardware_control.hw_action import get_packed_histogram
-from waspy.hardware_control.rbs_entities import CaenDetector
+from waspy.iba.rbs_entities import Detector
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
@@ -22,7 +22,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self._main)
         layout = QtWidgets.QVBoxLayout(self._main)
 
-        self.detector = CaenDetector(board="33", channel=0, identifier="", bins_min=0, bins_max=8192,
+        self.detector = Detector(board="33", channel=0, identifier="", bins_min=0, bins_max=8192,
                                      bins_width=1024)
         title_string = "Histogram board=" + self.detector.board + ", channel=" + str(self.detector.channel)
         self.fig = plt.figure(title_string)
@@ -95,4 +95,4 @@ if __name__ == "__main__":
     app.show()
     app.activateWindow()
     app.raise_()
-    qapp.sql_insert()
+    #qapp.sql_insert()
