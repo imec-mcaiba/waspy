@@ -333,7 +333,6 @@ class Window(QDialog):
         """
         while True:
             try:
-                # data = requests.get(f"http://localhost:8000/api/rbs/caen/detector/{self.detector_box.currentText()}").json()
                 board = self.detector_box.currentData()['board']
                 channel = self.detector_box.currentData()['channel']
                 data = requests.get(f"http://localhost:8000/api/rbs/caen/histogram/{board}/{channel}/pack/"
