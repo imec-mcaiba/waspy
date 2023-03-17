@@ -1,41 +1,12 @@
-[any.drivers.aml_u_v]
-type="aml"
-title="AML U V"
-url="http://localhost:30000/api/latest"
-names = ["U", "V"]
-
 [pellicle.drivers.motrona_terminal_voltage]
 type="motrona_ax350"
 title="Motrona terminal voltage"
 url="http://127.0.0.1:22100/api/latest"
 
-[pellicle.drivers.g64]
+[any.drivers.g64]
 type="mirion_g64"
 title="Mirion G64 Radiation"
 url="http://127.0.0.1:22102/api/latest"
-
-[pellicle.drivers.keithley]
-type="keithley"
-title="keithley"
-url="http://127.0.0.1:22101/api/latest"
-
-[pellicle.drivers.aml_x_y]
-type="aml"
-title="AML X Y"
-url="http://localhost:20000/api/latest"
-names = ["X", "Y"]
-
-[pellicle.drivers.aml_det_theta]
-type = "aml"
-title = "AML Detector Theta"
-url = "http://localhost:20000/api/latest"
-names = ["Detector", "Theta"]
-
-[pellicle.drivers.aml_phi_zeta]
-type = "aml"
-title = "AML Phi Zeta"
-url = "http://localhost:20000/api/latest"
-names = ["Phi", "Zeta"]
 
 [pellicle.drivers.motrona_charge]
 type = "motrona_dx350"
@@ -54,7 +25,4 @@ detectors = [
 ]
 
 
-[pellicle]
-local_dir = "/tmp/ACQ/5_data"
-remote_dir = "/tmp/ACQ/REM/_05_data"
 

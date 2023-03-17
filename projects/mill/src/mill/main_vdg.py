@@ -68,7 +68,6 @@ def build_job_and_hw_routes(router, mill_config: MillConfig, logbook_db: LogBook
         job_runner = JobRunner()
 
         pellicle_setup = pellicle_lib.PellicleSetup(mill_config.pellicle.get_driver_urls())
-        pellicle_file_writer = FileHandler(mill_config.pellicle.local_dir, mill_config.pellicle.remote_dir)
         pellicle_setup.configure_detectors(mill_config.pellicle.drivers.caen.detectors)
 
         recipe_meta = RecipeMeta(logbook_db, Path('./recipe_meta'))
