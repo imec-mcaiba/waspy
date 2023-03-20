@@ -14,6 +14,7 @@ class Detector(DetectorMetadata):
 class PellicleDriverUrls(BaseModel):
     caen: str
     motrona_charge: str
+    motrona_terminal_voltage: str
 
 
 class Plot(BaseModel):
