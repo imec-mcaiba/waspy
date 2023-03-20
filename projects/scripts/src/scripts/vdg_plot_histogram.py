@@ -71,21 +71,21 @@ class Window(QDialog):
         self.pause_status = QLabel("Acquiring data...")
 
         # Pile-Up Status Message
-        self.dead_time_text = QLabel("Dead time counter: ")
-        self.dead_time_value = QLabel("0")
+        self.pile_up_text = QLabel("Pile-up counter: ")
+        self.pile_up_value = QLabel("0")
         self.icon_lbl = QLabel()
         icon = app.style().standardIcon(QStyle.SP_MessageBoxWarning)
         self.icon_lbl.setPixmap(icon.pixmap(24))
         self.icon_lbl.hide()
-        dead_time_lyt = QHBoxLayout()
-        dead_time_lyt.addWidget(self.icon_lbl)
-        dead_time_lyt.addWidget(self.dead_time_text)
-        dead_time_lyt.addWidget(self.dead_time_value)
-        dead_time_lyt.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        pile_up_lyt = QHBoxLayout()
+        pile_up_lyt.addWidget(self.icon_lbl)
+        pile_up_lyt.addWidget(self.pile_up_text)
+        pile_up_lyt.addWidget(self.pile_up_value)
+        pile_up_lyt.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         status_lyt = QHBoxLayout()
         status_lyt.addWidget(self.pause_status)
-        status_lyt.addLayout(dead_time_lyt)
+        status_lyt.addLayout(pile_up_lyt)
 
         # Integration Window
         self.integrate_min = 0
@@ -338,14 +338,16 @@ class Window(QDialog):
                 data = requests.get(f"http://localhost:8000/api/rbs/caen/histogram/{board}/{channel}/pack/"
                                     f"{self.bin_min}-{self.bin_max}-{self.bin_nb}").json()
 
-                self.check_dead_time_counter(board, channel)
+                self.check_pile_up(board, channel)
             except Exception as e:
                 data = None
             yield data
 
-    def check_dead_time_counter(self, board, channel):
+    def check_pile_up(self, board, channel):
         caen_status = requests.get(f"http://localhost:8000/api/rbs/caen/").json()
-        self.dead_time_value.setText(str(caen_status['boards'][board]['channels'][channel]['dead_time_counter']))
+        self.pile_up_value.setText(str(caen_status['boards'][board]['channels'][channel]['pile_up']))
+        if int(self.pile_up_value.text()) > 0:
+            self.pile_up_value.setStyleSheet("color: red")
 
 
 if __name__ == '__main__':
