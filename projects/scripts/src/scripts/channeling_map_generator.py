@@ -42,7 +42,7 @@ def create_channeling_map():
     file_handler = FileHandler(Path(data_files_dir))
     title = f"{recipe_name}_{energy_window.start}_{energy_window.end}_" \
             f"{optimize_detector_identifier}"
-    save_channeling_map_to_disk(file_handler, "", cms_yields, title)
+    save_channeling_map_to_disk(file_handler, cms_yields, title)
 
 
 if __name__ == "__main__":
