@@ -21,7 +21,6 @@ class MillConfig(BaseModel):
     erd: Optional[ErdConfig]
     pellicle: Optional[PellicleConfig]
 
-
 class GlobalConfig(BaseSettings):
     CONFIG_FILE: Optional[str]
     FAKER = False

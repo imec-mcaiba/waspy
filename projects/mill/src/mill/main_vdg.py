@@ -7,14 +7,20 @@ from fastapi.openapi.docs import get_swagger_ui_html, get_swagger_ui_oauth2_redi
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from mill import mill_routes, pellicle_routes
+from mill import mill_routes, rbs_routes, erd_routes, pellicle_routes
 from mill.recipe_meta import RecipeMeta
+from waspy.iba import pellicle_setup as pellicle_lib
 from waspy.iba.file_handler import FileHandler
+from waspy.iba.erd_setup import ErdSetup
+from mill.job_factory import JobFactory
 from mill.systemd_routes import build_systemd_endpoints
 from mill.logbook_db import LogBookDb
 from mill.job_runner import JobRunner
-from waspy.iba import pellicle_setup as pellicle_lib
+from mill.job_routes import build_job_routes
 from mill.config import GlobalConfig, make_mill_config, MillConfig
+from fastapi.middleware.cors import CORSMiddleware
+app = FastAPI()
+
 
 
 def create_app():
@@ -23,9 +29,9 @@ def create_app():
     mill_config = make_mill_config(env_conf.CONFIG_FILE)
 
     if env_conf.ENV_STATE == "dev":
-        origins = ['http://localhost:3000']
+        origins = ['*']
     else:
-        origins = ['http://localhost']
+        origins = ['*']
     app = FastAPI(docs_url=None, redoc_url=None, swagger_ui_parameters={"syntaxHighlight": False})
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -68,9 +74,12 @@ def build_job_and_hw_routes(router, mill_config: MillConfig, logbook_db: LogBook
         job_runner = JobRunner()
 
         pellicle_setup = pellicle_lib.PellicleSetup(mill_config.pellicle.get_driver_urls())
-        pellicle_setup.configure_detectors(mill_config.pellicle.drivers.caen.detectors)
+        # pellicle_setup.configure_detectors(mill_config.rbs.drivers.caen.detectors)
 
         recipe_meta = RecipeMeta(logbook_db, Path('./recipe_meta'))
+
+        # factory = JobFactory(rbs_setup, rbs_file_writer, erd_setup, erd_file_writer, logbook_db, recipe_meta)
+        # build_job_routes(router, job_runner, factory)
 
         pellicle_routes.build_driver_endpoints(router, mill_config.pellicle.drivers)
         pellicle_routes.build_setup_endpoints(router, pellicle_setup)

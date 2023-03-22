@@ -1,19 +1,30 @@
-[any.drivers.motrona_terminal_voltage]
-type="motrona_ax350"
-title="Motrona terminal voltage"
-url="http://127.0.0.1:22100/api/latest"
-
 [any.drivers.g64]
 type="mirion_g64"
 title="Mirion G64 Radiation"
 url="http://127.0.0.1:22102/api/latest"
 
-[any.drivers.keithley]
-type="keithley"
-title="keithley"
+[pellicle.drivers.motrona_terminal_voltage]
+type="motrona_ax350"
+title="Motrona terminal voltage"
+url="http://127.0.0.1:22100/api/latest"
+
+[pellicle.drivers.motrona_charge]
+type="motrona_dx350"
+title="Motrona charge"
 url="http://127.0.0.1:22101/api/latest"
 
-#[any.drivers.motrona_terminal_voltage]
+[pellicle.drivers.caen]
+type = "caen"
+title = "Caen"
+url = "http://169.254.150.120:22200/api/latest"
+detectors = [
+	{"board"="32", "channel"=0, "identifier"="0", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+	{"board"="32", "channel"=1, "identifier"="1", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+	{"board"="32", "channel"=2, "identifier"="2", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+	{"board"="32", "channel"=3, "identifier"="3", "bins_min"=0, "bins_max"=11264, "bins_width"=1024},
+]
+
+#[pellicle.hardware.motrona_terminal_voltage]
 #type="motrona_ax350"
 #title="Motrona Terminal Voltage"
 #url="http://127.0.0.1:22103/api/latest"

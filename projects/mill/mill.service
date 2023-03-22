@@ -6,8 +6,8 @@ Requires=wait_eth_up.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/root/waspy/projects/mill
-ExecStart=/root/waspy/projects/mill/run_mill.sh
+WorkingDirectory=/home/mca/waspy/projects/mill
+ExecStart=/home/mca/waspy/projects/mill/run_mill.sh
 Restart=on-failure
 SyslogIdentifier=mill
 

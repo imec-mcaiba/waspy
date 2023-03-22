@@ -12,17 +12,22 @@ class Detector(DetectorMetadata):
 
 
 class PellicleDriverUrls(BaseModel):
+    #aml_x_y: str
+    #aml_phi_zeta: str
+    #aml_det_theta: str
     caen: str
     motrona_charge: str
     motrona_terminal_voltage: str
-
-
+    
 class Plot(BaseModel):
     title: str
     points: List[int]
 
 
 class PellicleData(BaseModel):
+    aml_x_y: Dict
+    aml_phi_zeta: Dict
+    aml_det_theta: Dict
     caen: Dict
     motrona: Dict
     histograms: Dict[str, List[int]] = Field(description="Maps detector name to resulting dataset")
@@ -46,6 +51,9 @@ class PellicleJournal(BaseModel):
 
 def get_pellicle_journal(rbs_data: PellicleData, start_time: datetime) -> PellicleJournal:
     return PellicleJournal(
+        x=rbs_data.aml_x_y["motor_1_position"], y=rbs_data.aml_x_y["motor_2_position"],
+        phi=rbs_data.aml_phi_zeta["motor_1_position"], zeta=rbs_data.aml_phi_zeta["motor_2_position"],
+        det=rbs_data.aml_det_theta["motor_1_position"], theta=rbs_data.aml_det_theta["motor_2_position"],
         accumulated_charge=rbs_data.accumulated_charge, measuring_time_sec=rbs_data.measuring_time_sec,
         histograms=rbs_data.histograms, start_time=start_time, end_time=datetime.now()
     )
