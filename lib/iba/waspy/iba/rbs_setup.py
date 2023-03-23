@@ -63,7 +63,7 @@ class RbsSetup:
         logging.info("[WASPY.IBA.RBS_SETUP] Moving rbs system to '" + str(position) + "'")
         self.motor_x_y.move_both([position.x, position.y])
         self.motor_phi_zeta.move_both([position.phi, position.zeta])
-        self.motor_det_theta.move_both([position.detector, position.theta])
+        self.motor_det_theta.move_both([position.det, position.theta])
 
     def load(self):
         self.motor_x_y.load()

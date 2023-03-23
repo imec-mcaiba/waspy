@@ -99,12 +99,12 @@ class PositionCoordinates(BaseModel):
     y: Optional[float]
     phi: Optional[float]
     zeta: Optional[float]
-    detector: Optional[float]
+    det: Optional[float]
     theta: Optional[float]
 
     def __str__(self):
         return "position_{x}_{y}_{phi}_{zeta}_{det}_{theta}".format(x=self.x, y=self.y, phi=self.phi, zeta=self.zeta,
-                                                                    det=self.detector, theta=self.theta)
+                                                                    det=self.det, theta=self.theta)
 
 
 class HeatMap(BaseModel):
