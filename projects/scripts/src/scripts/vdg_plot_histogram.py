@@ -10,13 +10,17 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import matplotlib.pyplot as plt
 
 
+
+mill_url = "http://localhost:8000"
+# mill_url = "https://169.254.150.100:8000"
+
+
 def get_caen_detectors():
     """
     Retrieves all Caen detectors
     """
-    config = requests.get(f"http://localhost:8000/api/config").json()
-    # print(config['rbs']['drivers']['caen']['detectors'])
-    return config['rbs']['drivers']['caen']['detectors']
+    config = requests.get(f"{mill_url}/api/config").json()
+    return config['pellicle']['drivers']['caen']['detectors']
 
 
 class Window(QDialog):
@@ -335,16 +339,16 @@ class Window(QDialog):
             try:
                 board = self.detector_box.currentData()['board']
                 channel = self.detector_box.currentData()['channel']
-                data = requests.get(f"http://localhost:8000/api/rbs/caen/histogram/{board}/{channel}/pack/"
+                data = requests.get(f"{mill_url}/api/pellicle/caen/histogram/{board}/{channel}/pack/"
                                     f"{self.bin_min}-{self.bin_max}-{self.bin_nb}").json()
 
-                self.check_pile_up(board, channel)
+                # self.check_pile_up(board, channel)
             except Exception as e:
                 data = None
             yield data
 
     def check_pile_up(self, board, channel):
-        caen_status = requests.get(f"http://localhost:8000/api/rbs/caen/").json()
+        caen_status = requests.get(f"{mill_url}/api/pellicle/caen/").json()
         self.pile_up_value.setText(str(caen_status['boards'][board]['channels'][channel]['pile_up']))
         if int(self.pile_up_value.text()) > 0:
             self.pile_up_value.setStyleSheet("color: red")
