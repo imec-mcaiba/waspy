@@ -36,7 +36,7 @@ class PlotUploadSpectrum(QWidget):
         self.filename_edit = QLineEdit()
         self.filename_edit.textChanged.connect(self.on_text_change)
         upload_layout = QHBoxLayout()
-        upload_layout.addWidget(QLabel('File:'))
+        upload_layout.addWidget(QLabel('Upload File:'))
         upload_layout.addWidget(self.filename_edit)
         upload_layout.addWidget(file_browse)
 
@@ -66,9 +66,9 @@ class PlotUploadSpectrum(QWidget):
         # Window Layout
         layout = QVBoxLayout()
         layout.addLayout(upload_layout)
-        layout.addWidget(self.toolbar)
         # layout.addWidget(self.binning)
         layout.addWidget(self.integrate)
+        layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         layout.addWidget(self.status)
         self.setLayout(layout)
@@ -103,4 +103,3 @@ class PlotUploadSpectrum(QWidget):
         self.axes.plot(energies, yields)
         self.axes.set_title(filename)
         self.canvas.draw()
-

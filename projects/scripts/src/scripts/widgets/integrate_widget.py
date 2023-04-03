@@ -18,6 +18,7 @@ class IntegrateWidget(QWidget):
         self.integrate_max_text.setValidator(QIntValidator())
         self.integrate_max_text.textChanged.connect(self._on_change_integration_window)
         self.integrate_value = QLabel("0")
+
         layout = QHBoxLayout()
         layout.addWidget(QLabel("Integrate window: "))
         layout.addWidget(QLabel("Emin"))
@@ -27,15 +28,15 @@ class IntegrateWidget(QWidget):
         layout.addWidget(self.integrate_btn)
         layout.addWidget(QLabel("| Value"))
         layout.addWidget(self.integrate_value)
-
         self.setLayout(layout)
 
     def calculate_integration_window(self, data):
-        if self.integrate_max > len(data)-1:
-            self.integrate_max = len(data)-1
+        print(len(data))
+        if self.integrate_max > len(data) - 1:
+            self.integrate_max = len(data) - 1
             self.integrate_max_text.setText(str(self.integrate_max))
-        if self.integrate_min > len(data)-1:
-            self.integrate_min = len(data)-1
+        if self.integrate_min > len(data) - 1:
+            self.integrate_min = len(data) - 1
             self.integrate_min_text.setText(str(self.integrate_min))
         self.integrate_value.setText(str(sum([data[i] for i in range(self.integrate_min, self.integrate_max)])))
 
@@ -65,4 +66,5 @@ class IntegrateWidget(QWidget):
     def apply_integration(self):
         self.integrate_min = int(self.integrate_min_text.text())
         self.integrate_max = int(self.integrate_max_text.text())
-        self.calculate_integration_window(self.data)
+        if self.data:
+            self.calculate_integration_window(self.data)

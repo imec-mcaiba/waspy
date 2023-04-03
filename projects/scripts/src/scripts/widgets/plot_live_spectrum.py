@@ -9,8 +9,6 @@ from widgets.integrate_widget import IntegrateWidget
 import requests
 
 mill_url = "http://localhost:8000"
-
-
 # mill_url = "https://mill.capitan.imec.be"
 
 
@@ -73,11 +71,11 @@ class PlotLiveSpectrum(QWidget):
 
         # Window Layout
         layout = QVBoxLayout()
-        layout.addWidget(self.toolbar)
         layout.addLayout(detector_lyt)
         layout.addWidget(self.binning)
         layout.addWidget(self.integrate)
         layout.addWidget(self.pause_btn)
+        layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         layout.addLayout(status_lyt)
         self.setLayout(layout)

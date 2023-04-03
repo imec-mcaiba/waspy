@@ -9,6 +9,9 @@ class Window(QDialog):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
 
+        self.setFixedHeight(760)
+        self.setFixedWidth(800)
+
         self.live_data_btn = QPushButton("Live Data")
         self.live_data_btn.clicked.connect(self.on_click_live_data_btn)
         self.live_data_btn.setStyleSheet("background-color: CornflowerBlue")
@@ -26,6 +29,7 @@ class Window(QDialog):
         layout.addLayout(tabs_layout)
         layout.addWidget(self.live_data)
         layout.addWidget(self.upload_data)
+        layout.addStretch()
         self.setLayout(layout)
 
     def on_click_live_data_btn(self):
