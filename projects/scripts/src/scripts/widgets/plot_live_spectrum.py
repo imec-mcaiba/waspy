@@ -9,6 +9,8 @@ from widgets.integrate_widget import IntegrateWidget
 import requests
 
 mill_url = "http://localhost:8000"
+
+
 # mill_url = "https://mill.capitan.imec.be"
 
 
@@ -24,16 +26,36 @@ class PlotLiveSpectrum(QWidget):
     def __init__(self):
         super(PlotLiveSpectrum, self).__init__()
 
+        # Detector Options
         self.detector_box = QComboBox()
         for d in get_caen_detectors():
             self.detector_box.addItem(d['identifier'], d)
-        detector_lyt = QHBoxLayout()
-        detector_lyt.addWidget(QLabel("Detector"))
-        detector_lyt.addWidget(self.detector_box)
-        detector_lyt.addStretch()
+        detector_layout = QHBoxLayout()
+        detector_layout.addWidget(QLabel("Detector"))
+        detector_layout.addWidget(self.detector_box)
+        detector_layout.addStretch()
 
         # Binning Widget
         self.binning = BinningWidget()
+        binning_layout = QVBoxLayout()
+        binning_layout.addWidget(self.binning)
+        binning_box = QGroupBox("Binning")
+        binning_box.setLayout(binning_layout)
+
+        # Integration Widget
+        self.integrate = IntegrateWidget()
+        self.value_label = QLabel("Value: ")
+        self.integrate_value = QLabel(str(0))
+        integrate_value_layout = QHBoxLayout()
+        integrate_value_layout.addWidget(self.value_label)
+        integrate_value_layout.addWidget(self.integrate_value)
+        integrate_value_layout.addStretch()
+
+        integrate_layout = QVBoxLayout()
+        integrate_layout.addWidget(self.integrate)
+        integrate_layout.addLayout(integrate_value_layout)
+        integrate_box = QGroupBox("Integrate Window")
+        integrate_box.setLayout(integrate_layout)
 
         # Pause Button
         self.pause_btn = QPushButton("Pause")
@@ -42,11 +64,8 @@ class PlotLiveSpectrum(QWidget):
 
         # Acquisition Status
         self.pause_status = QLabel("Acquiring data...")
-        status_lyt = QHBoxLayout()
-        status_lyt.addWidget(self.pause_status)
-
-        # Integration Window
-        self.integrate = IntegrateWidget()
+        status_layout = QHBoxLayout()
+        status_layout.addWidget(self.pause_status)
 
         # Variables
         self.pause = False
@@ -69,15 +88,20 @@ class PlotLiveSpectrum(QWidget):
         self.canvas.draw()
         self.toolbar.actions()[0].triggered.connect(self.on_click_home)
 
-        # Window Layout
+        # Binning and Integrate Layout
+        binning_integrate_layout = QHBoxLayout()
+        binning_integrate_layout.addWidget(binning_box)
+        binning_integrate_layout.addWidget(integrate_box)
+
+        # Main Layout
         layout = QVBoxLayout()
-        layout.addLayout(detector_lyt)
-        layout.addWidget(self.binning)
-        layout.addWidget(self.integrate)
+        layout.addLayout(detector_layout)
+        layout.addLayout(binning_integrate_layout)
         layout.addWidget(self.pause_btn)
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
-        layout.addLayout(status_lyt)
+        layout.addLayout(status_layout)
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
     def set_play_pause(self):
@@ -98,7 +122,7 @@ class PlotLiveSpectrum(QWidget):
         self.axes.set_autoscale_on(True)
         self.autoscale = True
 
-    def clear(self):
+    def clear_plot(self):
         """
         Clears plot area but needs to take into account the zoom region and autoscale mode
         """
@@ -138,11 +162,11 @@ class PlotLiveSpectrum(QWidget):
             return
         else:
             self.axes.set_facecolor('white')
-        self.clear()
+        self.clear_plot()
         self.reset_axes()
         self.axes.set_title(f"Detector {self.detector_box.currentText()}")
         self.axes.plot(data)
-        self.integrate.calculate_integration_window(data)
+        self.integrate_value.setText(str(self.integrate.calculate_integration_window(data)))
 
     def get_data(self):
         """

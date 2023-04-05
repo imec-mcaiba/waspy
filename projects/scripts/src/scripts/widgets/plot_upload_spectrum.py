@@ -1,13 +1,14 @@
 import os
-from pathlib import Path
 import re
+from pathlib import Path
+from uuid import uuid4
 
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import *
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from widgets.binning_widget import BinningWidget
 from widgets.integrate_widget import IntegrateWidget
 
 
@@ -30,24 +31,46 @@ class PlotUploadSpectrum(QWidget):
     def __init__(self):
         super(PlotUploadSpectrum, self).__init__()
 
-        # Upload File
-        file_browse = QPushButton('Browse')
-        file_browse.clicked.connect(self.on_click_browse)
-        self.filename_edit = QLineEdit()
-        self.filename_edit.textChanged.connect(self.on_text_change)
-        upload_layout = QHBoxLayout()
-        upload_layout.addWidget(QLabel('Upload File:'))
-        upload_layout.addWidget(self.filename_edit)
-        upload_layout.addWidget(file_browse)
+        self.data = []
 
-        # Binning Widget
-        self.binning = BinningWidget()
+        # Upload File Widget
+        self.upload_btn = QPushButton('Upload File')
+        self.upload_btn.setFixedWidth(100)
+        self.upload_btn.clicked.connect(self.on_click_upload)
 
-        # Integration Window
+        file_name_lbl = QLabel("File Name")
+        integration_value_lbl = QLabel("Integration Value")
+        space = QLabel("")
+        space.setFixedWidth(80)
+
+        column_layout = QHBoxLayout()
+        column_layout.addWidget(file_name_lbl)
+        column_layout.addWidget(integration_value_lbl)
+        column_layout.addWidget(space)
+
+        self.scrollLayout = QFormLayout()
+        self.scrollWidget = QWidget()
+        self.scrollWidget.setLayout(self.scrollLayout)
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setFixedHeight(100)
+        self.scrollArea.setWidget(self.scrollWidget)
+
+        upload_layout = QVBoxLayout()
+        upload_layout.addWidget(self.upload_btn)
+        upload_layout.addLayout(column_layout)
+        upload_layout.addWidget(self.scrollArea)
+        upload_box = QGroupBox("Upload Files")
+        upload_box.setLayout(upload_layout)
+
+        # Integration Widget
         self.integrate = IntegrateWidget()
-
-        # Status
-        self.status = QLabel("No data uploaded.")
+        self.integrate.integrate_btn.clicked.connect(self.refresh_integration)
+        integrate_layout = QHBoxLayout()
+        integrate_layout.addWidget(self.integrate)
+        integrate_box = QGroupBox("Integrate Window")
+        integrate_box.setLayout(integrate_layout)
+        integrate_box.setFixedWidth(170)
 
         # Plot
         self.fig = plt.figure()
@@ -62,44 +85,115 @@ class PlotUploadSpectrum(QWidget):
         self.axes.xaxis.set_ticks_position('bottom')
         self.axes.set_facecolor('lightgrey')
         self.canvas.draw()
+        self.autoscale = True
+        self.update_file_list()
 
-        # Window Layout
+        # Binning and Integrate Layout
+        sub_layout = QHBoxLayout()
+        sub_layout.addWidget(upload_box)
+        sub_layout.addWidget(integrate_box)
+
+        # Main Layout
         layout = QVBoxLayout()
-        layout.addLayout(upload_layout)
-        # layout.addWidget(self.binning)
-        layout.addWidget(self.integrate)
+        layout.addLayout(sub_layout)
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
-        layout.addWidget(self.status)
+        layout.setContentsMargins(0, 0, 0, 0)
+
         self.setLayout(layout)
 
-    def on_click_browse(self):
+    def on_click_upload(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Select a File", "C:\\")
         if filename:
             path = Path(filename)
-            self.filename_edit.setText(str(path))
+            yields, energies = parse_file(filename)
+            new_data = {
+                "id": uuid4(),
+                "path": path,
+                "file_name": os.path.basename(filename),
+                "yields": yields,
+                "energies": energies,
+                "integrate_value": self.integrate.calculate_integration_window(yields)
+            }
+            self.data.append(new_data)
+            self.update_file_list()
 
-    def on_text_change(self):
-        if os.path.isfile(self.filename_edit.text()):
-            print("Parsing file...")
-            self.status.setText(f"Plotting {self.filename_edit.text()}")
-            self.filename_edit.setStyleSheet('')
-            yields, energies = parse_file(self.filename_edit.text())
-            self.plot_graph(yields, energies, os.path.basename(self.filename_edit.text()))
+    def update_file_list(self):
+        # Clear scrollLayout
+        while self.scrollLayout.rowCount() > 0:
+            self.scrollLayout.removeRow(0)
 
-            self.integrate.data = yields
-            self.integrate.calculate_integration_window(yields)
+        # Add widgets to scrollLayout
+        for d in self.data:
+            file_upload_widget = FileUploadWidget(d)
+            self.scrollLayout.addRow(file_upload_widget)
+        self.plot_graph()
 
-        else:
-            self.filename_edit.setStyleSheet('color:red')
-            print("Not a correct file name")
+    def on_click_home(self):
+        self.axes.set_autoscale_on(True)
+        self.autoscale = True
 
-    def plot_graph(self, yields, energies, filename):
+    def clear_plot(self):
+        """
+        Clears plot area but needs to take into account the zoom region and autoscale mode
+        """
+        x_lim = self.axes.get_xlim()
+        y_lim = self.axes.get_ylim()
+
+        if not self.axes.get_autoscale_on():
+            self.autoscale = False
+
+        if not self.data:
+            self.autoscale = True
+
         self.axes.clear()
+
+        if not self.autoscale:
+            self.axes.set_xlim(x_lim)
+            self.axes.set_ylim(y_lim)
+
+    def plot_graph(self):
+        self.clear_plot()
         self.axes.set_facecolor('white')
         self.axes.set_xlabel("Energy Level")
         self.axes.set_ylabel("Occurrence")
         self.axes.grid(which='both')
-        self.axes.plot(energies, yields)
-        self.axes.set_title(filename)
+        for d in self.data:
+            self.axes.plot(d['energies'], d['yields'])
+        self.axes.legend([d['file_name'] for d in self.data])
+        if not self.data:
+            self.axes.set_facecolor('lightgrey')
         self.canvas.draw()
+
+    def refresh_integration(self):
+        for d in self.data:
+            d['integrate_value'] = self.integrate.calculate_integration_window(d['yields'])
+        self.update_file_list()
+
+
+class FileUploadWidget(QWidget):
+    def __init__(self, data):
+        super(FileUploadWidget, self).__init__()
+
+        self.data = data
+
+        self.file_name_lbl = QLabel(self.data['file_name'])
+        self.integrate_value = QLabel(str(self.data['integrate_value']))
+        self.remove_btn = QPushButton('remove')
+        self.remove_btn.setFixedWidth(80)
+        self.remove_btn.clicked.connect(self.on_remove)
+
+        # Main Layout
+        layout = QHBoxLayout()
+        layout.addWidget(self.file_name_lbl)
+        layout.addWidget(self.integrate_value)
+        layout.addWidget(self.remove_btn)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+    def on_remove(self):
+        for d in self.parent().parent().parent().parent().parent().data:
+            if self.data['id'] == d["id"]:
+                self.parent().parent().parent().parent().parent().data.remove(d)
+        self.parent().parent().parent().parent().parent().plot_graph()
+        self.parent().layout().removeRow(self)

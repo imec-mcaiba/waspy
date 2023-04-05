@@ -6,9 +6,12 @@ class BinningWidget(QWidget):
     def __init__(self):
         super(BinningWidget, self).__init__()
 
+        # Default Values
         self.bin_min = 0
         self.bin_max = 24576
         self.bin_nb = 1024
+
+        # Binning Parameters
         self.binning_min_textbox = QLineEdit(str(self.bin_min))
         self.binning_min_textbox.setValidator(QIntValidator())
         self.binning_min_textbox.textChanged.connect(self._on_change_binning_min)
@@ -18,20 +21,30 @@ class BinningWidget(QWidget):
         self.binning_nb_of_bins_textbox = QLineEdit(str(self.bin_nb))
         self.binning_nb_of_bins_textbox.setValidator(QIntValidator())
         self.binning_nb_of_bins_textbox.textChanged.connect(self._on_change_binning_nb_of_bins)
+
+        # Apply Button
         self.apply_binning_btn = QPushButton("Apply")
         self.apply_binning_btn.clicked.connect(self.apply_binning)
         self.apply_enabled = {'min': True, 'max': True, 'nb': True}
-        layout = QHBoxLayout()
-        layout.addWidget(QLabel("Binning:"))
-        layout.addWidget(QLabel("Min"))
-        layout.addWidget(self.binning_min_textbox)
-        layout.addWidget(QLabel("Max"))
-        layout.addWidget(self.binning_max_textbox)
-        layout.addWidget(QLabel("Nb. of bins"))
-        layout.addWidget(self.binning_nb_of_bins_textbox)
+
+        # Sub Layouts
+        min_layout = QHBoxLayout()
+        min_layout.addWidget(QLabel("Min"))
+        min_layout.addWidget(self.binning_min_textbox)
+        max_layout = QHBoxLayout()
+        max_layout.addWidget(QLabel("Max"))
+        max_layout.addWidget(self.binning_max_textbox)
+        nb_bins_layout = QHBoxLayout()
+        nb_bins_layout.addWidget(QLabel("Nb. of bins"))
+        nb_bins_layout.addWidget(self.binning_nb_of_bins_textbox)
+
+        # Main Layout
+        layout = QVBoxLayout()
+        layout.addLayout(min_layout)
+        layout.addLayout(max_layout)
+        layout.addLayout(nb_bins_layout)
         layout.addWidget(self.apply_binning_btn)
         layout.addStretch()
-
         self.setLayout(layout)
 
     def _on_change_binning_min(self):
@@ -117,7 +130,6 @@ class BinningWidget(QWidget):
         Decides whether the apply button should be enabled or disabled
         """
         min, max, nb = self.apply_enabled.values()
-        # print(f"min {min} max {max} nb {nb}")
         self.apply_binning_btn.setEnabled(min and max and nb)
 
     def apply_binning(self):

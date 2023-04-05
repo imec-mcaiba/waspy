@@ -7,38 +7,46 @@ class IntegrateWidget(QWidget):
         super(IntegrateWidget, self).__init__()
 
         self.data = []
+
+        # Default Values
         self.integrate_min = 0
         self.integrate_max = 100
-        self.integrate_btn = QPushButton("Apply")
-        self.integrate_btn.clicked.connect(self.apply_integration)
+
+        # Integration Parameters
         self.integrate_min_text = QLineEdit(str(self.integrate_min))
         self.integrate_min_text.setValidator(QIntValidator())
         self.integrate_min_text.textChanged.connect(self._on_change_integration_window)
         self.integrate_max_text = QLineEdit(str(self.integrate_max))
         self.integrate_max_text.setValidator(QIntValidator())
         self.integrate_max_text.textChanged.connect(self._on_change_integration_window)
-        self.integrate_value = QLabel("0")
 
-        layout = QHBoxLayout()
-        layout.addWidget(QLabel("Integrate window: "))
-        layout.addWidget(QLabel("Emin"))
-        layout.addWidget(self.integrate_min_text)
-        layout.addWidget(QLabel("Emax"))
-        layout.addWidget(self.integrate_max_text)
+        # Apply Button
+        self.integrate_btn = QPushButton("Apply")
+        self.integrate_btn.clicked.connect(self.apply_integration)
+
+        # Sub Layouts
+        min_layout = QHBoxLayout()
+        min_layout.addWidget(QLabel("E min"))
+        min_layout.addWidget(self.integrate_min_text)
+        max_layout = QHBoxLayout()
+        max_layout.addWidget(QLabel("E max"))
+        max_layout.addWidget(self.integrate_max_text)
+
+        # Main Layout
+        layout = QVBoxLayout()
+        layout.addLayout(min_layout)
+        layout.addLayout(max_layout)
         layout.addWidget(self.integrate_btn)
-        layout.addWidget(QLabel("| Value"))
-        layout.addWidget(self.integrate_value)
         self.setLayout(layout)
 
     def calculate_integration_window(self, data):
-        print(len(data))
         if self.integrate_max > len(data) - 1:
             self.integrate_max = len(data) - 1
             self.integrate_max_text.setText(str(self.integrate_max))
         if self.integrate_min > len(data) - 1:
             self.integrate_min = len(data) - 1
             self.integrate_min_text.setText(str(self.integrate_min))
-        self.integrate_value.setText(str(sum([data[i] for i in range(self.integrate_min, self.integrate_max)])))
+        return sum([data[i] for i in range(self.integrate_min, self.integrate_max)])
 
     def _on_change_integration_window(self):
         try:
