@@ -72,7 +72,7 @@ class PlotUploadSpectrum(QWidget):
         self.integrate.integrate_btn.clicked.connect(self.refresh_integration)
         integrate_layout = QHBoxLayout()
         integrate_layout.addWidget(self.integrate)
-        integrate_box = QGroupBox("Integrate Window")
+        integrate_box = QGroupBox("Integration Window")
         integrate_box.setLayout(integrate_layout)
         integrate_box.setFixedWidth(170)
 
@@ -114,7 +114,12 @@ class PlotUploadSpectrum(QWidget):
                     self.status.setText(f"File \"{d['file_name']}\" already uploaded")
                     self.status.setStyleSheet('color: red')
                     return
-            yields, energies = parse_file(filename)
+            try:
+                yields, energies = parse_file(filename)
+            except UnicodeDecodeError:
+                self.status.setText(f"Cannot decode file \"{os.path.basename(filename)}\"")
+                self.status.setStyleSheet('color: red')
+                return
             new_data = {
                 "id": uuid4(),
                 "path": path,

@@ -62,7 +62,7 @@ class PlotLiveSpectrum(QWidget):
         integrate_layout = QVBoxLayout()
         integrate_layout.addWidget(self.integrate)
         integrate_layout.addLayout(integrate_value_layout)
-        integrate_box = QGroupBox("Integrate Window")
+        integrate_box = QGroupBox("Integration Window")
         integrate_box.setLayout(integrate_layout)
 
         # Pause Button
