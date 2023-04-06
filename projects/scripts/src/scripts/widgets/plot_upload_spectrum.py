@@ -10,6 +10,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from widgets.integrate_widget import IntegrateWidget
+from widgets.popup_message import MessageWindow
 
 
 def parse_file(filename):
@@ -31,12 +32,18 @@ class PlotUploadSpectrum(QWidget):
     def __init__(self):
         super(PlotUploadSpectrum, self).__init__()
 
+
         self.data = []
+        message = MessageWindow("File already exists")
 
         # Upload File Widget
         self.upload_btn = QPushButton('Upload File')
         self.upload_btn.setFixedWidth(100)
         self.upload_btn.clicked.connect(self.on_click_upload)
+        self.status = QLabel("")
+        upload_button_layout = QHBoxLayout()
+        upload_button_layout.addWidget(self.upload_btn)
+        upload_button_layout.addWidget(self.status)
 
         file_name_lbl = QLabel("File Name")
         integration_value_lbl = QLabel("Integration Value")
@@ -57,7 +64,7 @@ class PlotUploadSpectrum(QWidget):
         self.scrollArea.setWidget(self.scrollWidget)
 
         upload_layout = QVBoxLayout()
-        upload_layout.addWidget(self.upload_btn)
+        upload_layout.addLayout(upload_button_layout)
         upload_layout.addLayout(column_layout)
         upload_layout.addWidget(self.scrollArea)
         upload_box = QGroupBox("Upload Files")
@@ -88,6 +95,7 @@ class PlotUploadSpectrum(QWidget):
         self.autoscale = True
         self.update_file_list()
 
+
         # Binning and Integrate Layout
         sub_layout = QHBoxLayout()
         sub_layout.addWidget(upload_box)
@@ -99,13 +107,17 @@ class PlotUploadSpectrum(QWidget):
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         layout.setContentsMargins(0, 0, 0, 0)
-
         self.setLayout(layout)
 
     def on_click_upload(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Select a File", "C:\\")
         if filename:
             path = Path(filename)
+            for d in self.data:
+                if d['path'] == path:
+                    self.status.setText(f"File \"{d['file_name']}\" already uploaded")
+                    self.status.setStyleSheet('color: red')
+                    return
             yields, energies = parse_file(filename)
             new_data = {
                 "id": uuid4(),
@@ -117,6 +129,8 @@ class PlotUploadSpectrum(QWidget):
             }
             self.data.append(new_data)
             self.update_file_list()
+            self.status.setText(f"File \"{new_data['file_name']}\" uploaded")
+            self.status.setStyleSheet('')
 
     def update_file_list(self):
         # Clear scrollLayout
@@ -197,3 +211,4 @@ class FileUploadWidget(QWidget):
                 self.parent().parent().parent().parent().parent().data.remove(d)
         self.parent().parent().parent().parent().parent().plot_graph()
         self.parent().layout().removeRow(self)
+

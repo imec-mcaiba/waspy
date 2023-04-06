@@ -11,8 +11,9 @@ class Window(QDialog):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
 
-        self.setFixedHeight(760)
-        self.setFixedWidth(800)
+        self.setFixedSize(760, 800)
+
+
 
         # Window Buttons
         self.live_data_btn = QPushButton("Live Data")
@@ -43,7 +44,6 @@ class Window(QDialog):
 
         self.live_data_btn.setStyleSheet(f"background-color: {BUTTON_COLOR}")
         self.upload_data_btn.setStyleSheet("")
-        return
 
     def on_click_upload_data_btn(self):
         self.live_data.hide()
@@ -51,7 +51,6 @@ class Window(QDialog):
 
         self.live_data_btn.setStyleSheet("")
         self.upload_data_btn.setStyleSheet(f"background-color: {BUTTON_COLOR}")
-        return
 
 
 if __name__ == '__main__':
@@ -59,5 +58,4 @@ if __name__ == '__main__':
 
     main = Window()
     main.show()
-
     sys.exit(app.exec_())
