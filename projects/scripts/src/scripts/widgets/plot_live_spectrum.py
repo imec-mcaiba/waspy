@@ -8,27 +8,35 @@ from widgets.integrate_widget import IntegrateWidget
 
 import requests
 
-mill_url = "http://localhost:8000"
 
-
-# mill_url = "https://mill.capitan.imec.be"
-
-
-def get_caen_detectors():
+def get_caen_detectors(mill_url, measurement_type):
     """
     Retrieves all Caen detectors
     """
-    config = requests.get(f"{mill_url}/api/config").json()
-    return config['rbs']['drivers']['caen']['detectors']
+    try:
+        config = requests.get(f"{mill_url}/api/config").json()
+        return config[f'{measurement_type}']['drivers']['caen']['detectors']
+    except requests.exceptions.ConnectionError:
+        return []
 
 
 class PlotLiveSpectrum(QWidget):
-    def __init__(self):
+    def __init__(self, lab):
         super(PlotLiveSpectrum, self).__init__()
+
+        if lab == "vdg":
+            self.mill_url = "https://169.254.150.100:8000"
+            self.measurement_type = "pellicle"
+        elif lab == "imec":
+            self.mill_url = "https://mill.capitan.imec.be"
+            self.measurement_type = "rbs"
+        else:
+            self.mill_url = "http://localhost:8000"
+            self.measurement_type = "rbs"
 
         # Detector Options
         self.detector_box = QComboBox()
-        for d in get_caen_detectors():
+        for d in get_caen_detectors(self.mill_url, self.measurement_type):
             self.detector_box.addItem(d['identifier'], d)
         detector_layout = QHBoxLayout()
         detector_layout.addWidget(QLabel("Detector"))
@@ -117,6 +125,7 @@ class PlotLiveSpectrum(QWidget):
             self.ani.resume()
             self.pause_btn.setText("Pause")
             self.pause_status.setText("Acquiring data...")
+            self.pause_status.setStyleSheet("")
 
     def on_click_home(self):
         self.axes.set_autoscale_on(True)
@@ -157,7 +166,8 @@ class PlotLiveSpectrum(QWidget):
         Manages refreshing the plot with new data
         """
         if data is None:
-            print("No data available !!")
+            self.pause_status.setText("No data available")
+            self.pause_status.setStyleSheet("color: red")
             self.axes.set_facecolor('lightgrey')
             return
         else:
@@ -176,7 +186,7 @@ class PlotLiveSpectrum(QWidget):
             try:
                 board = self.detector_box.currentData()['board']
                 channel = self.detector_box.currentData()['channel']
-                data = requests.get(f"{mill_url}/api/rbs/caen/histogram/{board}/{channel}/pack/"
+                data = requests.get(f"{self.mill_url}/api/{self.measurement_type}/caen/histogram/{board}/{channel}/pack/"
                                     f"{self.binning.bin_min}-{self.binning.bin_max}-{self.binning.bin_nb}").json()
 
             except Exception as e:

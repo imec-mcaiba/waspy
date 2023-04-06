@@ -8,12 +8,10 @@ BUTTON_COLOR = "CornflowerBlue"
 
 
 class Window(QDialog):
-    def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
+    def __init__(self, lab):
+        super(Window, self).__init__()
 
         self.setFixedSize(760, 800)
-
-
 
         # Window Buttons
         self.live_data_btn = QPushButton("Live Data")
@@ -26,7 +24,7 @@ class Window(QDialog):
         tabs_layout.addWidget(self.upload_data_btn)
 
         # Windows
-        self.live_data = PlotLiveSpectrum()
+        self.live_data = PlotLiveSpectrum(lab)
         self.upload_data = PlotUploadSpectrum()
         self.upload_data.hide()
 
@@ -56,6 +54,9 @@ class Window(QDialog):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    main = Window()
+    try:
+        main = Window(sys.argv[1])
+    except IndexError:
+        main = Window("dev")
     main.show()
     sys.exit(app.exec_())

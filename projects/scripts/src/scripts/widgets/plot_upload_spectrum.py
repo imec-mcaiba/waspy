@@ -10,7 +10,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from widgets.integrate_widget import IntegrateWidget
-from widgets.popup_message import MessageWindow
 
 
 def parse_file(filename):
@@ -32,9 +31,7 @@ class PlotUploadSpectrum(QWidget):
     def __init__(self):
         super(PlotUploadSpectrum, self).__init__()
 
-
         self.data = []
-        message = MessageWindow("File already exists")
 
         # Upload File Widget
         self.upload_btn = QPushButton('Upload File')
@@ -94,7 +91,6 @@ class PlotUploadSpectrum(QWidget):
         self.canvas.draw()
         self.autoscale = True
         self.update_file_list()
-
 
         # Binning and Integrate Layout
         sub_layout = QHBoxLayout()
@@ -211,4 +207,3 @@ class FileUploadWidget(QWidget):
                 self.parent().parent().parent().parent().parent().data.remove(d)
         self.parent().parent().parent().parent().parent().plot_graph()
         self.parent().layout().removeRow(self)
-
