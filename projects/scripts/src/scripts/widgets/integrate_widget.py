@@ -21,22 +21,26 @@ class IntegrateWidget(QWidget):
         self.integrate_max_text.textChanged.connect(self._on_change_integration_window)
 
         # Apply Button
+        self.hide_checkbox = QCheckBox("Hide")
         self.integrate_btn = QPushButton("Apply")
         self.integrate_btn.clicked.connect(self.apply_integration)
 
         # Sub Layouts
         min_layout = QHBoxLayout()
-        min_layout.addWidget(QLabel("E min"))
+        min_layout.addWidget(QLabel("Ch. min"))
         min_layout.addWidget(self.integrate_min_text)
         max_layout = QHBoxLayout()
-        max_layout.addWidget(QLabel("E max"))
+        max_layout.addWidget(QLabel("Ch. max"))
         max_layout.addWidget(self.integrate_max_text)
+        apply_layout = QHBoxLayout()
+        apply_layout.addWidget(self.integrate_btn)
+        apply_layout.addWidget(self.hide_checkbox)
 
         # Main Layout
         layout = QVBoxLayout()
         layout.addLayout(min_layout)
         layout.addLayout(max_layout)
-        layout.addWidget(self.integrate_btn)
+        layout.addLayout(apply_layout)
         self.setLayout(layout)
 
     def calculate_integration_window(self, data):
@@ -76,3 +80,4 @@ class IntegrateWidget(QWidget):
         self.integrate_max = int(self.integrate_max_text.text())
         if self.data:
             self.calculate_integration_window(self.data)
+

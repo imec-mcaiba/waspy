@@ -70,11 +70,12 @@ class PlotUploadSpectrum(QWidget):
         # Integration Widget
         self.integrate = IntegrateWidget()
         self.integrate.integrate_btn.clicked.connect(self.refresh_integration)
+        self.integrate.hide_checkbox.stateChanged.connect(self.refresh_integration)
         integrate_layout = QHBoxLayout()
         integrate_layout.addWidget(self.integrate)
         integrate_box = QGroupBox("Integration Window")
         integrate_box.setLayout(integrate_layout)
-        integrate_box.setFixedWidth(170)
+        integrate_box.setFixedWidth(200)
 
         # Plot
         self.fig = plt.figure()
@@ -170,14 +171,17 @@ class PlotUploadSpectrum(QWidget):
     def plot_graph(self):
         self.clear_plot()
         self.axes.set_facecolor('white')
-        self.axes.set_xlabel("Energy Level")
+        self.axes.set_xlabel("Channel")
         self.axes.set_ylabel("Occurrence")
         self.axes.grid(which='both')
         for d in self.data:
             self.axes.plot(d['energies'], d['yields'])
-        self.axes.legend([d['file_name'] for d in self.data])
+            self.axes.legend([d['file_name'] for d in self.data])
         if not self.data:
             self.axes.set_facecolor('lightgrey')
+        elif not self.integrate.hide_checkbox.isChecked():
+            self.axes.axvline(self.integrate.integrate_min, color="red", linestyle="dotted")
+            self.axes.axvline(self.integrate.integrate_max, color="red", linestyle="dotted")
         self.canvas.draw()
 
     def refresh_integration(self):

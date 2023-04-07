@@ -151,7 +151,7 @@ class PlotLiveSpectrum(QWidget):
         """
         Resets the x and y-axis
         """
-        self.axes.set_xlabel("Energy Level")
+        self.axes.set_xlabel("Channel")
         self.axes.set_ylabel("Occurrence")
         self.axes.grid(which='both')
         self.axes.yaxis.set_ticks_position('left')
@@ -176,6 +176,10 @@ class PlotLiveSpectrum(QWidget):
         self.reset_axes()
         self.axes.set_title(f"Detector {self.detector_box.currentText()}")
         self.axes.plot(data)
+
+        if data and not self.integrate.hide_checkbox.isChecked():
+            self.axes.axvline(self.integrate.integrate_min, color="red", linestyle="dotted")
+            self.axes.axvline(self.integrate.integrate_max, color="red", linestyle="dotted")
         self.integrate_value.setText(str(self.integrate.calculate_integration_window(data)))
 
     def get_data(self):
