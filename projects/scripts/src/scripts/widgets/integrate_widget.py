@@ -50,14 +50,16 @@ class IntegrateWidget(QWidget):
         if self.integrate_min > len(data) - 1:
             self.integrate_min = len(data) - 1
             self.integrate_min_text.setText(str(self.integrate_min))
-        return sum([data[i] for i in range(self.integrate_min, self.integrate_max)])
+        #if self.integrate_min == self.integrate_max:
+        #    return data[self.integrate_min]
+        return sum([data[i] for i in range(self.integrate_min, self.integrate_max+1)])
 
     def _on_change_integration_window(self):
         try:
             emin = int(self.integrate_min_text.text())
             emax = int(self.integrate_max_text.text())
 
-            if emin >= emax or emin < 0 or emax < 0:
+            if emin > emax or emin < 0 or emax < 0:
                 self.integrate_min_text.setStyleSheet("color: red")
                 self.integrate_max_text.setStyleSheet("color: red")
                 self.integration_apply_enabled = False
