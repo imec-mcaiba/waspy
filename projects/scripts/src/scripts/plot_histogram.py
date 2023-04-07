@@ -12,6 +12,7 @@ class Window(QDialog):
         super(Window, self).__init__()
 
         self.setFixedSize(760, 800)
+        self.setWindowTitle("plot_histogram.py")
 
         # Window Buttons
         self.live_data_btn = QPushButton("Live Data")
