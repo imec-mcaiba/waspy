@@ -7,9 +7,11 @@ from mill.logbook_db import LogBookDb
 from mill.recipe_meta import RecipeMeta
 from waspy.iba.file_handler import FileHandler
 from waspy.iba.iba_error import CancelError
-from waspy.iba.rbs_entities import RbsChannelingMap, CoordinateRange, Window, PositionCoordinates, ChannelingMapJournal, \
+from waspy.iba.rbs_entities import RbsChannelingMap, RbsRandom, CoordinateRange, Window, PositionCoordinates, \
+    ChannelingMapJournal, \
     get_positions_as_float, get_rbs_journal, ChannelingMapYield, RecipeType
-from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal
+from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal, run_random, \
+    save_rbs_journal
 from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
 
@@ -32,7 +34,7 @@ def run_channeling_map() -> ChannelingMapJournal:
     cms_yields = []
     rbs_index = 0
 
-    total_amount = len(zeta_angles)*len(theta_angles)
+    total_amount = len(zeta_angles) * len(theta_angles)
 
     for zeta in zeta_angles:
         for theta in theta_angles:
@@ -98,17 +100,27 @@ if __name__ == "__main__":
      - start_position
      - all coordinates in PositionCoordinates
     """
-    recipes = [RbsChannelingMap(
-        type=RecipeType.CHANNELING_MAP,
-        sample="sample2",
-        name="RBS23_001_A",
-        start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
-        charge_total=400,
-        zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
-        theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
-        yield_integration_window=Window(start=700, end=730),
-        optimize_detector_identifier="d01"
-    )]
+    recipes = [
+        RbsChannelingMap(
+            type=RecipeType.CHANNELING_MAP,
+            sample="sample2",
+            name="RBS23_001_A",
+            start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
+            charge_total=400,
+            zeta_coordinate_range=CoordinateRange(name="zeta", start=-2, end=2, increment=2),
+            theta_coordinate_range=CoordinateRange(name="theta", start=-2, end=2, increment=2),
+            yield_integration_window=Window(start=700, end=730),
+            optimize_detector_identifier="d01"
+        ),
+        #RbsRandom(
+        #    type=RecipeType.RANDOM,
+        #    sample="AE007607_D02_B",
+        #    name="RBS21_071_08B_A",
+        #    start_position=PositionCoordinates(x=10, y=22, phi=0),
+        #    charge_total=45000,
+        #    coordinate_range=CoordinateRange(name="phi", start=0, end=30, increment=2)
+        #)
+    ]
 
     """
     ===================================================================================
@@ -123,14 +135,21 @@ if __name__ == "__main__":
     recipe_meta_data = recipe_meta_data.fill_rbs_recipe_meta()
 
     for recipe in recipes:
-        logging.info(f"{log_label} =========== Running {recipe.name} ===========")
-        file_handler.set_base_folder(recipe.name)
-        logging.info(
-            f"{log_label} Files are saved in {os.path.join(local_dir, recipe.name)} and {os.path.join(remote_dir, recipe.name)}")
+        if recipe.type == RecipeType.CHANNELING_MAP:
+            logging.info(f"{log_label} =========== Running {recipe.name} ===========")
+            file_handler.set_base_folder(recipe.name)
+            logging.info(
+                f"{log_label} Files are saved in {os.path.join(local_dir, recipe.name)} and {os.path.join(remote_dir, recipe.name)}")
 
-        journal = run_channeling_map()
-        title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
-                f"{recipe.optimize_detector_identifier}"
-        save_channeling_map_to_disk(file_handler, journal.cms_yields, title)
+            journal = run_channeling_map()
+            title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
+                    f"{recipe.optimize_detector_identifier}"
+            save_channeling_map_to_disk(file_handler, journal.cms_yields, title)
 
-        logging.info(f"{log_label} All measurements completed!")
+            logging.info(f"{log_label} All measurements completed!")
+
+        if recipe.type == RecipeType.RANDOM:
+            logging.info(f"{log_label} =========== Running {recipe.name} ===========")
+            file_handler.set_base_folder(recipe.name)
+            journal = run_random(recipe, rbs_setup)
+            save_rbs_journal(file_handler, recipe, journal, recipe_meta_data)

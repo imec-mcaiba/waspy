@@ -54,9 +54,9 @@ title = "MPA 3"
 url = "http://localhost:22400/api/latest"
 
 [rbs]
-local_dir = "/tmp/ACQ/5_data"
-remote_dir = "/tmp/ACQ/REM/_05_data"
+local_dir = "/home/mca/ACQ/5_data"
+remote_dir = "/home/mca/ACQ/REM/_05_data"
 
 [erd]
-local_dir = "/tmp/ACQ/ERD/5_data"
-remote_dir = "/tmp/ACQ/ERD/REM/_05_data"
+local_dir = "/home/mca/ACQ/ERD/5_data"
+remote_dir = "/home/mca/ACQ/ERD/REM/_05_data"

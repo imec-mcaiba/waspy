@@ -1,5 +1,4 @@
 from typing import Optional
-
 from pydantic import BaseSettings, BaseModel
 
 from mill.erd_entities import ErdConfig

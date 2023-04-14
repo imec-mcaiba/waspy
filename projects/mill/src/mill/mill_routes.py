@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List
 
 import requests
@@ -44,7 +45,7 @@ def histogram(response: Response, to_url, board: str, channel: int, start: int, 
         response.status_code = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
         return {}
     caen = Caen(to_url)
-    detector = DetectorMetadata(board=board, channel=channel,bins_min=start, bins_max=end, bins_width=width)
+    detector = DetectorMetadata(board=board, channel=channel, bins_min=start, bins_max=end, bins_width=width)
     return caen.get_histogram(detector)
 
 
@@ -60,12 +61,12 @@ def build_detector_endpoints(some_router, from_url, to_url, detectors: List[Dete
         async def get_histogram(request: Request, response: Response):
             path = str(request.url.path)
             last_part = path.split("/")[-1]
-            
-            active_detector = next(some_detector for some_detector in detectors 
-                    if some_detector.identifier == last_part)
 
-            return histogram(response, to_url, active_detector.board, active_detector.channel, 
-                    active_detector.bins_min, active_detector.bins_max, active_detector.bins_width)
+            active_detector = next(some_detector for some_detector in detectors
+                                   if some_detector.identifier == last_part)
+
+            return histogram(response, to_url, active_detector.board, active_detector.channel,
+                             active_detector.bins_min, active_detector.bins_max, active_detector.bins_width)
 
         @some_router.get(from_url + "/detector/" + detector.identifier + "_compressed", tags=tags)
         async def get_histogram(request: Request, response: Response):
