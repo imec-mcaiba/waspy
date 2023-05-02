@@ -48,10 +48,16 @@ type = "mdrive"
 title = "MDrive Theta"
 url = "http://localhost:22300/api/latest"
 
+[erd.drivers.motrona_theta_encoder]
+type="motrona_dx350"
+title="Motrona Theta Encoder"
+url="http://localhost:30100/api/latest"
+
 [erd.drivers.mpa3]
 type = "mpa3"
 title = "MPA 3"
 url = "http://localhost:22400/api/latest"
+
 
 [rbs]
 local_dir = "/home/mca/ACQ/5_data"

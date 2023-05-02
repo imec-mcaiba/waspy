@@ -3,10 +3,6 @@ type="motrona_ax350"
 title="Motrona SF6"
 url="http://127.0.0.1:22101/api/latest"
 
-[any.drivers.motrona_theta_encoder]
-type="motrona_dx350"
-title="Motrona Theta Encoder"
-url="http://127.0.0.1:22105/api/latest"
 
 [any.drivers.motrona_terminal_voltage]
 type="motrona_ax350"
@@ -72,6 +68,12 @@ url = "http://127.0.0.1:22123/api/latest"
 type = "mpa3"
 title = "MPA 3"
 url = "http://172.16.0.11:25000/api/latest"
+
+[erd.drivers.motrona_theta_encoder]
+type="motrona_dx350"
+title="Motrona Theta Encoder"
+url="http://127.0.0.1:22105/api/latest"
+
 
 [rbs]
 local_dir = "/mnt/mcaiba_nas/transfer_RBS"

@@ -84,6 +84,8 @@ def _serialize_meta(journal: ErdJournal, recipe: ErdRecipe, extra):
  * Z Increment           := {recipe.z_increment}
  * Z Repeat              := {recipe.z_repeat}
  *
+ * Theta encoder counts  := {journal.theta_encoder}
+ *
  * Start time            := {journal.start_time}
  * End time              := {journal.end_time}
  *

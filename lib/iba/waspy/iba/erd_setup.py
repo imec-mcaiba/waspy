@@ -5,8 +5,10 @@ from threading import Lock
 
 from waspy.drivers.fastcom_mpa3 import FastcomMpa3
 from waspy.drivers.ims_mdrive import ImsMDrive
+from waspy.drivers.motrona_dx350 import MotronaDx350
 from waspy.iba.erd_entities import ErdDriverUrls, PositionCoordinates, ErdData
 from waspy.iba.preempt import preemptive
+
 
 
 class ErdSetup:
@@ -18,6 +20,7 @@ class ErdSetup:
         self.mdrive_z = ImsMDrive(erd_driver_urls.mdrive_z)
         self.mdrive_theta = ImsMDrive(erd_driver_urls.mdrive_theta)
         self.mpa3 = FastcomMpa3(erd_driver_urls.mpa3)
+        self.motrona_theta_encoder = MotronaDx350(erd_driver_urls.motrona_theta_encoder)
         self._lock = Lock()
         self._abort = False
         self._fake = False
@@ -52,12 +55,14 @@ class ErdSetup:
         status_mdrive_z = self.mdrive_z.get_status()
         status_mdrive_theta = self.mdrive_theta.get_status()
         status_mpa3 = self.mpa3.get_status()
+        status_motrona_theta_encoder = self.motrona_theta_encoder.get_status()
 
         histogram = ""
         if get_histogram:
             histogram = self.get_histogram()
         return ErdData.parse_obj(
             {"mdrive_z": status_mdrive_z, "mdrive_theta": status_mdrive_theta, "mpa3": status_mpa3,
+             "motrona_theta_encoder": status_motrona_theta_encoder,
              "histogram": histogram, "measuring_time_sec": self.get_measuring_time()})
 
     @preemptive
