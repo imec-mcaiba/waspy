@@ -20,6 +20,7 @@ class ErdSetup:
         self.mdrive_z = ImsMDrive(erd_driver_urls.mdrive_z)
         self.mdrive_theta = ImsMDrive(erd_driver_urls.mdrive_theta)
         self.mpa3 = FastcomMpa3(erd_driver_urls.mpa3)
+        self.motrona_z_encoder = MotronaDx350(erd_driver_urls.motrona_z_encoder)
         self.motrona_theta_encoder = MotronaDx350(erd_driver_urls.motrona_theta_encoder)
         self._lock = Lock()
         self._abort = False
@@ -55,6 +56,7 @@ class ErdSetup:
         status_mdrive_z = self.mdrive_z.get_status()
         status_mdrive_theta = self.mdrive_theta.get_status()
         status_mpa3 = self.mpa3.get_status()
+        status_motrona_z_encoder = self.motrona_z_encoder.get_status()
         status_motrona_theta_encoder = self.motrona_theta_encoder.get_status()
 
         histogram = ""
@@ -62,6 +64,7 @@ class ErdSetup:
             histogram = self.get_histogram()
         return ErdData.parse_obj(
             {"mdrive_z": status_mdrive_z, "mdrive_theta": status_mdrive_theta, "mpa3": status_mpa3,
+             "motrona_z_encoder": status_motrona_z_encoder,
              "motrona_theta_encoder": status_motrona_theta_encoder,
              "histogram": histogram, "measuring_time_sec": self.get_measuring_time()})
 
