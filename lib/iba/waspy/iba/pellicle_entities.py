@@ -25,9 +25,9 @@ class Plot(BaseModel):
 
 
 class PellicleData(BaseModel):
-    aml_x_y: Dict
-    aml_phi_zeta: Dict
-    aml_det_theta: Dict
+    #aml_x_y: Dict
+    #aml_phi_zeta: Dict
+    #aml_det_theta: Dict
     caen: Dict
     motrona: Dict
     histograms: Dict[str, List[int]] = Field(description="Maps detector name to resulting dataset")
