@@ -26,6 +26,9 @@ class PellicleSetup:
     def __init__(self, pellicle_hw: PellicleDriverUrls):
         self.hw = pellicle_hw
 
+        #self.motor_x_y = AmlSmd2(self.hw.aml_x_y)
+        #self.motor_phi_zeta = AmlSmd2(self.hw.aml_phi_zeta)
+        #self.motor_det_theta = AmlSmd2(self.hw.aml_det_theta)
         self.charge_counter = MotronaDx350(self.hw.motrona_charge)
         self.data_acquisition = Caen(self.hw.caen)
 
