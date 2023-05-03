@@ -25,9 +25,6 @@ class Plot(BaseModel):
 
 
 class PellicleData(BaseModel):
-    #aml_x_y: Dict
-    #aml_phi_zeta: Dict
-    #aml_det_theta: Dict
     caen: Dict
     motrona: Dict
     histograms: Dict[str, List[int]] = Field(description="Maps detector name to resulting dataset")
@@ -38,12 +35,6 @@ class PellicleData(BaseModel):
 class PellicleJournal(BaseModel):
     start_time: datetime
     end_time: datetime
-    x: float
-    y: float
-    det: float
-    theta: float
-    phi: float
-    zeta: float
     histograms: Dict[str, List[int]] = Field(description="Maps detector name to resulting dataset")
     measuring_time_sec: float
     accumulated_charge: float
@@ -51,9 +42,6 @@ class PellicleJournal(BaseModel):
 
 def get_pellicle_journal(rbs_data: PellicleData, start_time: datetime) -> PellicleJournal:
     return PellicleJournal(
-        x=rbs_data.aml_x_y["motor_1_position"], y=rbs_data.aml_x_y["motor_2_position"],
-        phi=rbs_data.aml_phi_zeta["motor_1_position"], zeta=rbs_data.aml_phi_zeta["motor_2_position"],
-        det=rbs_data.aml_det_theta["motor_1_position"], theta=rbs_data.aml_det_theta["motor_2_position"],
         accumulated_charge=rbs_data.accumulated_charge, measuring_time_sec=rbs_data.measuring_time_sec,
         histograms=rbs_data.histograms, start_time=start_time, end_time=datetime.now()
     )
