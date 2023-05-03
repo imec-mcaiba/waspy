@@ -124,9 +124,9 @@ class PellicleSetup:
             raise IbaError("Detector: '" + str(identifier) + "' Does not exist. Available detectors:" + detector_names)
 
     def get_status(self, get_histograms=False) -> PellicleData:
-        status_x_y = self.motor_x_y.get_status()
-        status_phi_zeta = self.motor_phi_zeta.get_status()
-        status_det_theta = self.motor_det_theta.get_status()
+        #status_x_y = self.motor_x_y.get_status()
+        #status_phi_zeta = self.motor_phi_zeta.get_status()
+        #status_det_theta = self.motor_det_theta.get_status()
 
         status_charge_counter = self.charge_counter.get_status()
         status_data_acquisition = self.data_acquisition.get_status()
@@ -134,11 +134,17 @@ class PellicleSetup:
         histograms = []
         if get_histograms:
             histograms = self.get_histograms()
+        #return PellicleData.parse_obj(
+        #    {"aml_x_y": status_x_y, "aml_phi_zeta": status_phi_zeta, "aml_det_theta": status_det_theta,
+        #     "motrona": status_charge_counter, "caen": status_data_acquisition, "detectors": self.detectors,
+        #     "histograms": histograms, "measuring_time_sec": self._acquisition_run_time,
+        #     "accumulated_charge": self._acquisition_accumulated_charge})
+
         return PellicleData.parse_obj(
-            {"aml_x_y": status_x_y, "aml_phi_zeta": status_phi_zeta, "aml_det_theta": status_det_theta,
-             "motrona": status_charge_counter, "caen": status_data_acquisition, "detectors": self.detectors,
+            {"motrona": status_charge_counter, "caen": status_data_acquisition, "detectors": self.detectors,
              "histograms": histograms, "measuring_time_sec": self._acquisition_run_time,
              "accumulated_charge": self._acquisition_accumulated_charge})
+
 
     def acquire_data(self, total_charge) -> PellicleData:
         """Warning: this function can take a while ( >1 hour)"""
