@@ -18,23 +18,13 @@ from mill.config import make_mill_config
 
 log_label = "[WASPY.SCRIPTS.CHANNELING_MAP_MEASUREMENT]"
 
-def path_length(current, final):
-    return round(math.sqrt((current[0]-final[0])**2 + (current[1]-final[1])**2), 2)
-
-
-def shortest_path(zeta_angles, zeta_increment, theta_angles, theta_increment):
-    final_coord = (zeta_angles[len(zeta_angles)-1], theta_angles[len(theta_angles)-1])
-    current_coord = (zeta_angles[0], theta_angles[0])
-
-    path = [current_coord]
-
-    while (current_coord[0] < final_coord[0] or current_coord[1] < final_coord[1]):
-        if path_length((current_coord[0], current_coord[1]+theta_increment), final_coord) < path_length((current_coord[0]+zeta_increment, current_coord[1]), final_coord):
-            current_coord = (current_coord[0], round(current_coord[1]+theta_increment, 2))
-        else:
-            current_coord = (round(current_coord[0]+zeta_increment, 2), current_coord[1])
-        path.append(current_coord)
+def shortest_path(zeta_angles, theta_angles):
+    coefficient = len(zeta_angles)/len(theta_angles)
+    path = []
+    for i in range(len(theta_angles)):
+        path.append((zeta_angles[round(i*coefficient)], theta_angles[i]))
     return path
+
 
 def run_channeling_slope() -> ChannelingMapJournal:
     """
@@ -49,7 +39,7 @@ def run_channeling_slope() -> ChannelingMapJournal:
     zeta_angles = get_positions_as_float(recipe.zeta_coordinate_range)
     theta_angles = get_positions_as_float(recipe.theta_coordinate_range)
 
-    shortest = shortest_path(zeta_angles, recipe.zeta_coordinate_range.increment, theta_angles, recipe.theta_coordinate_range.increment)
+    shortest = shortest_path(zeta_angles, theta_angles)
     print(shortest)
 
     rbs_journals = []
@@ -130,8 +120,8 @@ if __name__ == "__main__":
             name="RBS23_001_A",
             start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
             charge_total=400,
-            zeta_coordinate_range=CoordinateRange(name="zeta", start=0, end=4, increment=0.2),
-            theta_coordinate_range=CoordinateRange(name="theta", start=0, end=6, increment=0.2),
+            zeta_coordinate_range=CoordinateRange(name="zeta", start=0, end=4, increment=0.1),
+            theta_coordinate_range=CoordinateRange(name="theta", start=0, end=6, increment=0.1),
             yield_integration_window=Window(start=10, end=50),
             optimize_detector_identifier="d01"
         ),
