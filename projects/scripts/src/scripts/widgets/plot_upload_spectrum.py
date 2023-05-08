@@ -23,7 +23,6 @@ def parse_file(filename):
             if re_data:
                 energies.append(int(re_data.group(1)))
                 yields.append(int(re_data.group(2)))
-
     return yields, energies
 
 
@@ -156,6 +155,12 @@ class PlotUploadSpectrum(QWidget):
                 self.status.setText(f"Cannot decode file \"{os.path.basename(filename)}\"")
                 self.status.setStyleSheet('color: red')
                 return
+
+            if len(yields) == 0 or len(energies) == 0:
+                self.status.setText(f"Cannot decode file \"{os.path.basename(filename)}\"")
+                self.status.setStyleSheet('color: red')
+                return
+
             new_data = {
                 "id": uuid4(),
                 "path": path,
