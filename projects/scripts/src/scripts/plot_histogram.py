@@ -8,7 +8,7 @@ BUTTON_COLOR = "CornflowerBlue"
 
 
 class Window(QDialog):
-    def __init__(self, lab):
+    def __init__(self, lab, data_file=None):
         super(Window, self).__init__()
 
         self.setFixedSize(760, 800)
@@ -26,7 +26,7 @@ class Window(QDialog):
 
         # Windows
         self.live_data = PlotLiveSpectrum(lab)
-        self.upload_data = PlotUploadSpectrum()
+        self.upload_data = PlotUploadSpectrum(data_file)
         self.upload_data.hide()
 
         # Main Layout
@@ -55,8 +55,11 @@ class Window(QDialog):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
+    if len(sys.argv) >= 3:
+        data_file = sys.argv[2]
+
     try:
-        main = Window(sys.argv[1])
+        main = Window(sys.argv[1], data_file)
     except IndexError:
         main = Window("dev")
     main.show()

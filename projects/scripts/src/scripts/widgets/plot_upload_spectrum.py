@@ -28,10 +28,11 @@ def parse_file(filename):
 
 
 class PlotUploadSpectrum(QWidget):
-    def __init__(self):
+    def __init__(self, data_file):
         super(PlotUploadSpectrum, self).__init__()
 
         self.data = []
+
 
         # Upload File Widget
         self.upload_btn = QPushButton('Upload File')
@@ -41,6 +42,8 @@ class PlotUploadSpectrum(QWidget):
         upload_button_layout = QHBoxLayout()
         upload_button_layout.addWidget(self.upload_btn)
         upload_button_layout.addWidget(self.status)
+
+
 
         file_name_lbl = QLabel("File Name")
         integration_value_lbl = QLabel("Integration Value")
@@ -98,6 +101,10 @@ class PlotUploadSpectrum(QWidget):
         sub_layout.addWidget(upload_box)
         sub_layout.addWidget(integrate_box)
 
+
+        if data_file:
+            self.init_data_file_upload(data_file)
+
         # Main Layout
         layout = QVBoxLayout()
         layout.addLayout(sub_layout)
@@ -105,6 +112,34 @@ class PlotUploadSpectrum(QWidget):
         layout.addWidget(self.canvas)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+
+
+    def init_data_file_upload(self, filename):
+        path = Path(filename)
+        print(path)
+        for d in self.data:
+            if d['path'] == path:
+                self.status.setText(f"File \"{d['file_name']}\" already uploaded")
+                self.status.setStyleSheet('color: red')
+                return
+        try:
+            yields, energies = parse_file(filename)
+        except UnicodeDecodeError:
+            self.status.setText(f"Cannot decode file \"{os.path.basename(filename)}\"")
+            self.status.setStyleSheet('color: red')
+            return
+        new_data = {
+            "id": uuid4(),
+            "path": path,
+            "file_name": os.path.basename(filename),
+            "yields": yields,
+            "energies": energies,
+            "integrate_value": self.integrate.calculate_integration_window(yields)
+        }
+        self.data.append(new_data)
+        self.update_file_list()
+        self.status.setText(f"File \"{new_data['file_name']}\" uploaded")
+        self.status.setStyleSheet('')
 
     def on_click_upload(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Select a File", "C:\\")
