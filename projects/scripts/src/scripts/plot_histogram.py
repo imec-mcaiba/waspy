@@ -57,6 +57,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) >= 3:
         data_file = sys.argv[2]
+    else: data_file = None
 
     try:
         main = Window(sys.argv[1], data_file)

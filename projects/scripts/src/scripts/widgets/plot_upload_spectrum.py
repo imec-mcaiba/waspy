@@ -31,7 +31,7 @@ class PlotUploadSpectrum(QWidget):
         super(PlotUploadSpectrum, self).__init__()
 
         self.data = []
-
+        self.latest_dir = "C:\\"
 
         # Upload File Widget
         self.upload_btn = QPushButton('Upload File')
@@ -115,7 +115,6 @@ class PlotUploadSpectrum(QWidget):
 
     def init_data_file_upload(self, filename):
         path = Path(filename)
-        print(path)
         for d in self.data:
             if d['path'] == path:
                 self.status.setText(f"File \"{d['file_name']}\" already uploaded")
@@ -141,9 +140,10 @@ class PlotUploadSpectrum(QWidget):
         self.status.setStyleSheet('')
 
     def on_click_upload(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Select a File", "C:\\")
+        filename, _ = QFileDialog.getOpenFileName(self, "Select a File", self.latest_dir)
         if filename:
             path = Path(filename)
+            self.latest_dir = os.path.dirname(path)
             for d in self.data:
                 if d['path'] == path:
                     self.status.setText(f"File \"{d['file_name']}\" already uploaded")
