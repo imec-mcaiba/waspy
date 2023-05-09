@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from matplotlib import pyplot as plt, animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -72,8 +73,14 @@ class PlotLiveSpectrum(QWidget):
 
         # Acquisition Status
         self.pause_status = QLabel("Acquiring data...")
-        status_layout = QHBoxLayout()
-        status_layout.addWidget(self.pause_status)
+        self.pileup_label = QLabel("Pile Up Rate: ")
+        self.pileup_rate = QLabel("0")
+        status_layout = QGridLayout()
+        status_layout.addWidget(self.pause_status, 0, 0, Qt.AlignLeft)
+        pileup_layout = QHBoxLayout()
+        pileup_layout.addWidget(self.pileup_label)
+        pileup_layout.addWidget(self.pileup_rate)
+        status_layout.addLayout(pileup_layout, 0, 1, Qt.AlignRight)
 
         # Variables
         self.pause = False
@@ -182,6 +189,16 @@ class PlotLiveSpectrum(QWidget):
             self.axes.axvline(self.integrate.integrate_max, color="red", linestyle="dotted")
         self.integrate_value.setText(str(self.integrate.calculate_integration_window(data)))
 
+    def update_pileup(self, board, channel):
+        try:
+            self.pileup_rate.setText(str(
+                requests.get(f"{self.mill_url}/api/{self.measurement_type}/caen").json() \
+                    ['boards'][board]['channels'][channel]['pile_up']))
+            self.pileup_rate.setStyleSheet("")
+        except KeyError as e:
+            self.pileup_rate.setText("N/A")
+            self.pileup_rate.setStyleSheet("color: red")
+
     def get_data(self):
         """
         Retrieves data from the Waspy API (Mill)
@@ -192,7 +209,8 @@ class PlotLiveSpectrum(QWidget):
                 channel = self.detector_box.currentData()['channel']
                 data = requests.get(f"{self.mill_url}/api/{self.measurement_type}/caen/histogram/{board}/{channel}/pack/"
                                     f"{self.binning.bin_min}-{self.binning.bin_max}-{self.binning.bin_nb}").json()
-
+                self.update_pileup(board, channel)
             except Exception as e:
                 data = None
+
             yield data
