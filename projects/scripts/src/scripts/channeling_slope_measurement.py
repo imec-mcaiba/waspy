@@ -4,26 +4,49 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+from matplotlib import pyplot as plt
+
 from mill.logbook_db import LogBookDb
 from mill.recipe_meta import RecipeMeta
 from waspy.iba.file_handler import FileHandler
 from waspy.iba.iba_error import CancelError
 from waspy.iba.rbs_entities import RbsChannelingMap, RbsRandom, CoordinateRange, Window, PositionCoordinates, \
     ChannelingMapJournal, \
-    get_positions_as_float, get_rbs_journal, ChannelingMapYield, RecipeType
+    get_positions_as_float, get_rbs_journal, ChannelingMapYield, RecipeType, Plot, Graph, GraphGroup, RbsChannelingSlope
+from waspy.iba.rbs_plot import plot_graph_group
 from waspy.iba.rbs_recipes import save_channeling_map_to_disk, get_sum, save_channeling_map_journal, run_random, \
-    save_rbs_journal
+    save_rbs_journal, save_channeling_graphs_to_disk
 from waspy.iba.rbs_setup import RbsSetup
 from mill.config import make_mill_config
 
 log_label = "[WASPY.SCRIPTS.CHANNELING_MAP_MEASUREMENT]"
 
-def shortest_path(zeta_angles, theta_angles):
-    coefficient = len(zeta_angles)/len(theta_angles)
-    path = []
-    for i in range(len(theta_angles)):
-        path.append((zeta_angles[round(i*coefficient)], theta_angles[i]))
-    return path
+
+def shortest_path(coordinate_start, coordinate_end, steps):
+    zeta_angles = []
+    theta_angles = []
+
+    for s in range(steps+1):
+        zeta_angles.append(round(coordinate_start.zeta + (coordinate_end.zeta - coordinate_start.zeta)/(steps)*s, 1))
+        theta_angles.append(round(coordinate_start.theta + (coordinate_end.theta - coordinate_start.theta)/(steps)*s, 1))
+    return zeta_angles, theta_angles
+
+
+def save_channeling_slope(file_handler, journal, title):
+    data = []
+    x_labels = []
+
+    for channelingmap in journal.cms_yields:
+        data.append(channelingmap.energy_yield)
+        x_labels.append(f"({channelingmap.zeta}, {channelingmap.theta})")
+    fig, ax = plt.subplots()
+    ax.plot(x_labels, data)
+    ax.set_title(title)
+    plt.xticks(rotation=90)
+    ax.tick_params(axis='both', which='major', labelsize=6)
+    ax.tick_params(axis='both', which='minor', labelsize=4)
+
+    file_handler.write_matplotlib_fig_to_disk(f'{title}.png', fig)
 
 
 def run_channeling_slope() -> ChannelingMapJournal:
@@ -36,22 +59,14 @@ def run_channeling_slope() -> ChannelingMapJournal:
     start_time = datetime.now()
     rbs_setup.move(recipe.start_position)
 
-    zeta_angles = get_positions_as_float(recipe.zeta_coordinate_range)
-    theta_angles = get_positions_as_float(recipe.theta_coordinate_range)
-
-    shortest = shortest_path(zeta_angles, theta_angles)
-    print(shortest)
+    zeta_angles, theta_angles = shortest_path(recipe.coordinate_start, recipe.coordinate_end, recipe.steps)
 
     rbs_journals = []
     cms_yields = []
     rbs_index = 0
 
-    total_amount = len(shortest)
-
-    for zeta, theta in shortest:
-        print(zeta)
-        print(theta)
-        logging.info(f"{log_label} Measurement {rbs_index + 1}/{total_amount}")
+    for zeta, theta in zip(zeta_angles, theta_angles):
+        logging.info(f"{log_label} Measurement {rbs_index + 1}/{recipe.steps+1}")
         rbs_setup.move(PositionCoordinates(zeta=zeta, theta=theta))
         cms_step_start_time = datetime.now()
 
@@ -114,25 +129,18 @@ if __name__ == "__main__":
      - all coordinates in PositionCoordinates
     """
     recipes = [
-        RbsChannelingMap(
-            type=RecipeType.CHANNELING_MAP,
+        RbsChannelingSlope(
+            type=RecipeType.CHANNELING_SLOPE,
             sample="sample2",
             name="RBS23_001_A",
             start_position=PositionCoordinates(x=10, y=10, phi=10, detector=170),
             charge_total=400,
-            zeta_coordinate_range=CoordinateRange(name="zeta", start=0, end=4, increment=0.1),
-            theta_coordinate_range=CoordinateRange(name="theta", start=0, end=6, increment=0.1),
-            yield_integration_window=Window(start=10, end=50),
+            coordinate_start=PositionCoordinates(zeta=-1, theta=-7),
+            coordinate_end=PositionCoordinates(zeta=3, theta=7),
+            steps=10,
+            yield_integration_window=Window(start=0, end=10),
             optimize_detector_identifier="d01"
         ),
-        #RbsRandom(
-        #    type=RecipeType.RANDOM,
-        #    sample="AE007607_D02_B",
-        #    name="RBS21_071_08B_A",
-        #    start_position=PositionCoordinates(x=10, y=22, phi=0),
-        #    charge_total=45000,
-        #    coordinate_range=CoordinateRange(name="phi", start=0, end=30, increment=2)
-        #)
     ]
 
     """
@@ -156,7 +164,6 @@ if __name__ == "__main__":
         journal = run_channeling_slope()
         title = f"{recipe.name}_{recipe.yield_integration_window.start}_{recipe.yield_integration_window.end}_" \
                 f"{recipe.optimize_detector_identifier}"
-        save_channeling_map_to_disk(file_handler, journal.cms_yields, title)
+        save_channeling_slope(file_handler, journal, title)
 
         logging.info(f"{log_label} All measurements completed!")
-

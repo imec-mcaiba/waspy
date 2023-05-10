@@ -149,6 +149,7 @@ class RbsHistogramGraphDataSet(BaseModel):
 
 
 class RecipeType(str, Enum):
+    CHANNELING_SLOPE = "rbs_channeling_slope"
     CHANNELING_MAP = "rbs_channeling_map"
     CHANNELING = "rbs_channeling"
     RANDOM = "rbs_random"
@@ -279,6 +280,21 @@ class RbsChannelingMap(BaseModel):
     theta_coordinate_range: CoordinateRange
     yield_integration_window: Window
     optimize_detector_identifier: str
+
+
+class RbsChannelingSlope(BaseModel):
+    """ The model for a channeling map measurement - the 2 vary_coordinates are changed depending on each other """
+    type: Literal[RecipeType.CHANNELING_SLOPE]
+    sample: str
+    name: str
+    start_position: Optional[PositionCoordinates]
+    charge_total: int
+    coordinate_start: PositionCoordinates
+    coordinate_end: PositionCoordinates
+    steps: int
+    yield_integration_window: Window
+    optimize_detector_identifier: str
+
 
 
 class RbsSingleStep(BaseModel):
