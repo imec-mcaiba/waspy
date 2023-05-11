@@ -42,7 +42,7 @@ def save_channeling_slope(file_handler, journal, title):
     fig, ax = plt.subplots()
     ax.plot(x_labels, data)
     ax.set_title(title)
-    plt.xticks(rotation=90)
+    #plt.xticks(rotation=90)
     ax.tick_params(axis='both', which='major', labelsize=6)
     ax.tick_params(axis='both', which='minor', labelsize=4)
 
