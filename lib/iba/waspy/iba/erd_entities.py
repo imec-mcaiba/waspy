@@ -60,6 +60,6 @@ def get_erd_journal(erd_data: ErdData, start_time: datetime) -> ErdJournal:
     return ErdJournal(
         start_time=start_time, end_time=datetime.now(), measuring_time_sec=erd_data.measuring_time_sec,
         z=erd_data.mdrive_z["motor_position"], theta=erd_data.mdrive_theta["motor_position"],
-        z_encoder=erd_data.motrona_z_encoder["counts"],
-        theta_encoder=erd_data.motrona_theta_encoder["counts"],
+        z_encoder=erd_data.motrona_z_encoder["charge(nC)"],
+        theta_encoder=erd_data.motrona_theta_encoder["charge(nC)"],
         histogram=erd_data.histogram)
