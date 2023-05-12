@@ -10,6 +10,7 @@ from waspy.iba.erd_entities import ErdDriverUrls, ErdRecipe
 class ErdDriverGroup(BaseModel):
     mdrive_z: SimpleConfig
     mdrive_theta: SimpleConfig
+    motrona_z_encoder: SimpleConfig
     motrona_theta_encoder: SimpleConfig
     mpa3: SimpleConfig
 
@@ -23,6 +24,7 @@ class ErdConfig(BaseModel):
         return ErdDriverUrls(
             mdrive_z=self.drivers.mdrive_z.url,
             mdrive_theta=self.drivers.mdrive_theta.url,
+            motrona_z_encoder=self.drivers.motrona_z_encoder.url,
             motrona_theta_encoder=self.drivers.motrona_theta_encoder.url,
             mpa3=self.drivers.mpa3.url
         )
