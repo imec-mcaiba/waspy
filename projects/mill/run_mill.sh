@@ -1,5 +1,5 @@
 #!/bin/bash
-export config_file="./lab_config.toml"
+export config_file="/mnt/winbe_wasp/mill_config/lab_config.toml"
 export faker=false
 export env_state="prod"
 export logbook_url="https://db.capitan.imec.be"
